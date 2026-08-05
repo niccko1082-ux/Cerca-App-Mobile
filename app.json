@@ -17,7 +17,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.maribeth3112.cerca"
     },
     "web": {
       "output": "static",
@@ -37,6 +38,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "d30f1b79-f9b6-40cb-a08c-c455270b7fba"
+      }
+    },
+    "owner": "maribeth3112"
   }
 }
