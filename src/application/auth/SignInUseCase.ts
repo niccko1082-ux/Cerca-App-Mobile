@@ -14,7 +14,7 @@ export class LoginUseCase {
             throw new Error('El formato del correo electronico no es valido.');
         }
     
-        const session= await this.authRepository.login(email, password);
+        const session= await this.authRepository.signIn(email, password);
     
         await this.authRepository.saveSession(session);
     
