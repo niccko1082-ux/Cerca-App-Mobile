@@ -17,15 +17,15 @@ export function AnimatedSplashOverlay() {
   const splashKeyframe = new Keyframe({
     0: {
       transform: [{ scale: 1 }],
-      opacity: 1,
+      opacity: 1,efad
     },
     20: {
       opacity: 1,
     },
     70: {
-      opacity: 0,
+      opacity: 0,ssdv
       easing: Easing.elastic(0.7),
-    },
+    },rr
     100: {
       opacity: 0,
       transform: [{ scale: 1 }],
