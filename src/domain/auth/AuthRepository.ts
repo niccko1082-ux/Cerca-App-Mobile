@@ -1,12 +1,11 @@
-import { AuthSession } from "./User";
+import { AuthSession, SignUpData } from "./User";
 
 export interface AuthRepository {
 
-    login(email: string, password: string): Promise<AuthSession>;
-
-    saveSession(session: AuthSession): Promise<void>;
-
-    getStoredSession(): Promise<AuthSession | null>;
-
-    logout(): Promise<void>;
+  signUp(data: SignUpData): Promise<AuthSession>;
+  signIn(email: string, password: string): Promise<AuthSession>;
+  refreshToken(refreshToken: string): Promise<AuthSession>;
+  signOut(): Promise<void>;
+  saveSession(session: AuthSession): Promise<void>;
+  getStoredSession(): Promise<AuthSession | null>;
 }
