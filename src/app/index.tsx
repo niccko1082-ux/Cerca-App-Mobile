@@ -23,9 +23,10 @@ export default function HomeScreen() {
     setRole,
     email,
     setEmail,
-    password,     
-    setPassword,  
+    password,
+    setPassword,
     loading,
+    error,
     handleSubmit,
   } = useLoginForm();
 
@@ -54,6 +55,7 @@ export default function HomeScreen() {
             onSubmit={handleSubmit}
             onPressRegister={handleRegisterPress}
             isLoading={loading}
+            error={error}
           />
         </ThemedView>
       </ScrollView>

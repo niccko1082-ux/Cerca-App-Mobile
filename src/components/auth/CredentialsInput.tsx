@@ -1,6 +1,6 @@
 // src/components/auth/CredentialsInput.tsx
 import React, { useState } from 'react';
-import { ActivityIndicator, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, TextInput, TouchableOpacity, View, Pressable } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ThemedText } from '@/components/themed-text';
 import { useTheme } from '@/hooks/use-theme';
@@ -13,6 +13,7 @@ interface Props {
   onSubmit?: () => void;
   onPressRegister?: () => void;
   isLoading?: boolean;
+  error?: string | null;
 }
 
 export function CredentialsInput({
@@ -23,6 +24,7 @@ export function CredentialsInput({
   onSubmit,
   onPressRegister,
   isLoading = false,
+  error = null,
 }: Props) {
   const t = useTheme();
   const [showPassword, setShowPassword] = useState(false);
@@ -69,6 +71,11 @@ export function CredentialsInput({
         </View>
       </View>
 
+      {/* Mensaje de error */}
+      {error ? (
+        <ThemedText style={styles.errorText}>{error}</ThemedText>
+      ) : null}
+
       {/* Botón de Enviar Formulario */}
       <TouchableOpacity
         style={[styles.submitButton, { backgroundColor: t.primary }]}
@@ -88,11 +95,11 @@ export function CredentialsInput({
         <ThemedText style={[styles.registerText, { color: t.text }]}>
           ¿No tienes una cuenta?{' '}
         </ThemedText>
-        <TouchableOpacity onPress={onPressRegister} activeOpacity={0.7}>
+        <Pressable onPress={onPressRegister} >
           <ThemedText style={[styles.registerLink, { color: t.primary }]}>
             Regístrate
           </ThemedText>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
   );
@@ -112,6 +119,10 @@ const styles = StyleSheet.create({
   },
   icon: { marginRight: 8 },
   input: { flex: 1, height: '100%' },
+  errorText: {
+    color: '#D32F2F',
+    fontSize: 13,
+  },
   submitButton: {
     height: 48,
     borderRadius: 10,
