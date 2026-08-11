@@ -1,98 +1,82 @@
-import * as Device from "expo-device";
-import { Platform, StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+// src/app/index.tsx
+import React from 'react';
+import { ScrollView, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
-import { AnimatedIcon } from "@/components/animated-icon";
-import { HintRow } from "@/components/hint-row";
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { WebBadge } from "@/components/web-badge";
-import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
+import { CredentialsInput } from '@/components/auth/CredentialsInput'; 
+import { LoginHeader } from '@/components/auth/LoginHeader';
+import { ParticipantSelector } from '@/components/auth/ParticipantSelector';
+import { RoleSelector } from '@/components/auth/RoleSelector';
+import { ThemedView } from '@/components/themed-view';
 
-function getDevMenuHint() {
-  if (Platform.OS === "web") {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === "android" ? "cmd+m (or ctrl+m)" : "cmd+d";
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import { useLoginForm } from '@/presentation/auth/hooks/useLoginForm';
+import { useTheme } from '@/hooks/use-theme';
 
 export default function HomeScreen() {
+  const t = useTheme();
+  const router = useRouter();
+  const {
+    participantType,
+    setParticipantType,
+    role,
+    setRole,
+    email,
+    setEmail,
+    password,     
+    setPassword,  
+    loading,
+    handleSubmit,
+  } = useLoginForm();
+
+  const handleRegisterPress = () => {
+    // Redirige a la pantalla de registro (o la ruta destinada para el registro)
+    router.push('/register');
+  };
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp; Cerca
-          </ThemedText>
-        </ThemedView>
+    <SafeAreaView style={[styles.container, { backgroundColor: t.background }]}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <LoginHeader />
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
+        <ThemedView style={[styles.card, { backgroundColor: t.card }]}>
+          <ParticipantSelector
+            selected={participantType}
+            onSelect={setParticipantType}
           />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
+          <RoleSelector selected={role} onSelect={setRole} />
+          
+          <CredentialsInput
+            email={email}
+            onChangeEmail={setEmail}
+            password={password}
+            onChangePassword={setPassword}
+            onSubmit={handleSubmit}
+            onPressRegister={handleRegisterPress}
+            isLoading={loading}
           />
         </ThemedView>
-
-        {Platform.OS === "web" && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    flexDirection: "row",
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: "center",
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+  scrollContent: {
+    padding: 20,
+    alignItems: 'center',
   },
-  heroSection: {
-    alignItems: "center",
-    justifyContent: "center",
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: "center",
-  },
-  code: {
-    textTransform: "uppercase",
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: "stretch",
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  card: {
+    width: '100%',
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
   },
 });

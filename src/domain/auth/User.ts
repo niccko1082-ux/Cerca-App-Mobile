@@ -15,3 +15,12 @@ export interface SignUpData {
     password: string;
     name?: string; 
 }
+
+export type Role = 'USER' | 'MODERATOR' | 'ADMIN';
+export type ParticipantType = 'Cliente' | 'Proveedor';
+
+export interface LoginFormState {
+  participantType: ParticipantType;
+  role: Role;
+  email: string;
+}
