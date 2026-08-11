@@ -1,6 +1,9 @@
 import * as SecureStore from 'expo-secure-store';
+import { z } from 'zod';
 import { AuthRepository } from '../../domain/auth/AuthRepository';
 import { AuthSession, SignUpData } from '../../domain/auth/User';
+import { authSessionSchema } from '../../domain/auth/schemas/authSession.schema';
+import { apiErrorSchema } from '../../domain/auth/schemas/apiError.schema';
 
 const SESSION_KEY = 'user_session_tokens';
 
@@ -8,21 +11,21 @@ export class ApiAuthAdapter implements AuthRepository {
   constructor(private baseUrl: string) {}
 
   async signUp(data: SignUpData): Promise<AuthSession> {
-    return this.postRequest<AuthSession>('/v1/auth/sign-up', data);
+    return this.postRequest('/v1/auth/sign-up', data, authSessionSchema);
   }
 
   async signIn(email: string, password: string): Promise<AuthSession> {
-    return this.postRequest<AuthSession>('/v1/auth/sign-in', { email, password });
+    return this.postRequest('/v1/auth/sign-in', { email, password }, authSessionSchema);
   }
 
   async refreshToken(refreshToken: string): Promise<AuthSession> {
-    return this.postRequest<AuthSession>('/v1/auth/refresh', { refreshToken });
+    return this.postRequest('/v1/auth/refresh', { refreshToken }, authSessionSchema);
   }
 
   async signOut(): Promise<void> {
     const session = await this.getStoredSession();
     if (session?.accessToken) {
-      await this.postRequest('/v1/auth/sign-out', {}, session.accessToken);
+      await this.postRequest('/v1/auth/sign-out', {}, z.unknown(), session.accessToken);
     }
     await SecureStore.deleteItemAsync(SESSION_KEY);
   }
@@ -37,7 +40,12 @@ export class ApiAuthAdapter implements AuthRepository {
     return JSON.parse(raw) as AuthSession;
   }
 
-  private async postRequest<T>(endpoint: string, body: object, token?: string): Promise<T> {
+  private async postRequest<T>(
+    endpoint: string,
+    body: object,
+    schema: z.ZodType<T>,
+    token?: string
+  ): Promise<T> {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -49,9 +57,19 @@ export class ApiAuthAdapter implements AuthRepository {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `Error en la petición: ${response.status}`);
+      const parsedError = apiErrorSchema.safeParse(errorData);
+      const detail = parsedError.success
+        ? parsedError.data.detail || parsedError.data.message || parsedError.data.title
+        : undefined;
+      throw new Error(detail || `Error en la petición: ${response.status}`);
     }
 
-    return response.json();
+    const json = await response.json();
+    const result = schema.safeParse(json);
+    if (!result.success) {
+      throw new Error('La respuesta del servidor no tiene el formato esperado.');
+    }
+
+    return result.data;
   }
 }
