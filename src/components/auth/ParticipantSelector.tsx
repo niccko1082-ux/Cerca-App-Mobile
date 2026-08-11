@@ -25,9 +25,9 @@ export function ParticipantSelector({ selected, onSelect }: Props) {
                     style={[
                         styles.button,
                         {
-                            borderColor: t.border,
+                            borderColor: selected === 'Cliente' ? t.primary : t.border,
                             backgroundColor:
-                                selected === 'Cliente' ? t.primary + '15' : 'transparent',
+                                selected === 'Cliente' ? t.primary + '20' : 'transparent',
                         },
                     ]}
                     onPress={() => onSelect('Cliente')}
@@ -53,9 +53,9 @@ export function ParticipantSelector({ selected, onSelect }: Props) {
                     style={[
                         styles.button,
                         {
-                            borderColor: t.border,
+                            borderColor: selected === 'Proveedor' ? t.primary : t.border,
                             backgroundColor:
-                                selected === 'Proveedor' ? t.primary + '15' : 'transparent',
+                                selected === 'Proveedor' ? t.primary + '20' : 'transparent',
                         },
                     ]}
                     onPress={() => onSelect('Proveedor')}

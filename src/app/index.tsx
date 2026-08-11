@@ -2,6 +2,7 @@
 import React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 import { CredentialsInput } from '@/components/auth/CredentialsInput'; 
 import { LoginHeader } from '@/components/auth/LoginHeader';
@@ -14,6 +15,7 @@ import { useTheme } from '@/hooks/use-theme';
 
 export default function HomeScreen() {
   const t = useTheme();
+  const router = useRouter();
   const {
     participantType,
     setParticipantType,
@@ -23,7 +25,14 @@ export default function HomeScreen() {
     setEmail,
     password,     
     setPassword,  
+    loading,
+    handleSubmit,
   } = useLoginForm();
+
+  const handleRegisterPress = () => {
+    // Redirige a la pantalla de registro (o la ruta destinada para el registro)
+    router.push('/register');
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: t.background }]}>
@@ -42,6 +51,9 @@ export default function HomeScreen() {
             onChangeEmail={setEmail}
             password={password}
             onChangePassword={setPassword}
+            onSubmit={handleSubmit}
+            onPressRegister={handleRegisterPress}
+            isLoading={loading}
           />
         </ThemedView>
       </ScrollView>

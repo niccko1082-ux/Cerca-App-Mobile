@@ -1,14 +1,13 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { useTheme } from '@/hooks/use-theme';
+import { StyleSheet, View } from 'react-native';
 
 export function LoginHeader() {
   const t = useTheme();
 
   return (
     <View style={styles.header}>
-      <ThemedText style={[styles.logo, { color: t.primary }]}></ThemedText>
+      <ThemedText style={[styles.logo, { color: t.primary }]}>LOGO</ThemedText>
       <ThemedText type="title" style={[styles.brandText, { color: t.text }]}>
         Cerca
       </ThemedText>

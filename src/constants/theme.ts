@@ -6,6 +6,7 @@ const palette = {
   beigeBackground: '#F4E1D2', // Modo Claro
   vinotintoPrimary: '#7B243B', // Principal 'Cerca'
   vinotintoAccent: '#964C61',
+  vinotintoLight: '#E06D85', // Tono vinotinto brillante y legible para Modo Oscuro
   deepBlue: '#1F354D',
   highlightOrange: '#F18933', // 'ADMIN'
   neutralText: '#4D4039',
@@ -42,7 +43,7 @@ const darkTheme = {
   card: palette.darkCard,
   border: '#444444',
   icon: palette.darkIcon,
-  primary: palette.vinotintoPrimary,
+  primary: palette.vinotintoLight,
   roleUser: palette.darkText,
   roleModerator: palette.darkIcon,
   roleAdmin: palette.highlightOrange,
