@@ -1,40 +1,66 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
-import '@/global.css';
-
 import { Platform } from 'react-native';
 
+// 1. Definición de la paleta base pura (hexadecimales)
+const palette = {
+  white: '#FFFFFF',
+  beigeBackground: '#F4E1D2', // Modo Claro
+  vinotintoPrimary: '#7B243B', // Principal 'Cerca'
+  vinotintoAccent: '#964C61',
+  deepBlue: '#1F354D',
+  highlightOrange: '#F18933', // 'ADMIN'
+  neutralText: '#4D4039',
+  neutralIcon: '#737773',
+  darkBackground: '#212121', // Fondo Modo Oscuro
+  darkCard: '#313131',      // Tarjeta Modo Oscuro
+  darkText: '#E0E0E0',
+  darkIcon: '#9E9E9E',
+};
+
+// 2. Mapeo semántico para Modo Claro
+const lightTheme = {
+  text: palette.vinotintoPrimary,
+  background: palette.beigeBackground,
+  backgroundElement: '#F0F0F3',
+  backgroundSelected: '#E0E1E6',
+  textSecondary: '#60646C',
+  card: palette.white,
+  border: '#E0E0E0',
+  icon: palette.neutralIcon,
+  primary: palette.vinotintoPrimary,
+  roleUser: palette.deepBlue,
+  roleModerator: '#757575',
+  roleAdmin: palette.highlightOrange,
+};
+
+// 3. Mapeo semántico para Modo Oscuro
+const darkTheme = {
+  text: palette.darkText,
+  background: palette.darkBackground,
+  backgroundElement: '#212225',
+  backgroundSelected: '#2E3135',
+  textSecondary: '#B0B4BA',
+  card: palette.darkCard,
+  border: '#444444',
+  icon: palette.darkIcon,
+  primary: palette.vinotintoPrimary,
+  roleUser: palette.darkText,
+  roleModerator: palette.darkIcon,
+  roleAdmin: palette.highlightOrange,
+};
+
+// 4. Exportación que espera tu hook existente (useTheme)
 export const Colors = {
-  light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
-  },
-  dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
-  },
-} as const;
+  light: lightTheme,
+  dark: darkTheme,
+};
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {

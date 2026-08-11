@@ -1,0 +1,78 @@
+// src/components/auth/CredentialsInput.tsx
+import React, { useState } from 'react';
+import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { ThemedText } from '@/components/themed-text';
+import { useTheme } from '@/hooks/use-theme';
+
+interface Props {
+  email: string;
+  onChangeEmail: (text: string) => void;
+  password: string;
+  onChangePassword: (text: string) => void;
+}
+
+export function CredentialsInput({ email, onChangeEmail, password, onChangePassword }: Props) {
+  const t = useTheme();
+  const [showPassword, setShowPassword] = useState(false);
+
+  return (
+    <View style={styles.container}>
+      {/* Campo de Correo Electrónico */}
+      <View style={styles.fieldGroup}>
+        <ThemedText style={[styles.label, { color: t.icon }]}>Correo electrónico</ThemedText>
+        <View style={[styles.wrapper, { borderColor: t.border }]}>
+          <MaterialCommunityIcons name="email-outline" size={20} color={t.icon} style={styles.icon} />
+          <TextInput
+            style={[styles.input, { color: t.text }]}
+            placeholder="tu@correo.com"
+            placeholderTextColor={t.icon}
+            value={email}
+            onChangeText={onChangeEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
+      </View>
+
+      {/* Campo de Contraseña */}
+      <View style={styles.fieldGroup}>
+        <ThemedText style={[styles.label, { color: t.icon }]}>Contraseña</ThemedText>
+        <View style={[styles.wrapper, { borderColor: t.border }]}>
+          <MaterialCommunityIcons name="lock-outline" size={20} color={t.icon} style={styles.icon} />
+          <TextInput
+            style={[styles.input, { color: t.text }]}
+            placeholder="••••••••"
+            placeholderTextColor={t.icon}
+            value={password}
+            onChangeText={onChangePassword}
+            secureTextEntry={!showPassword}
+          />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <MaterialCommunityIcons
+              name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+              size={20}
+              color={t.icon}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { gap: 16 },
+  fieldGroup: { gap: 6 },
+  label: { fontSize: 14 },
+  wrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    height: 48,
+  },
+  icon: { marginRight: 8 },
+  input: { flex: 1, height: '100%' },
+});
