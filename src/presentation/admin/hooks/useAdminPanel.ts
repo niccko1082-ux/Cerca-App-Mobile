@@ -25,11 +25,10 @@ const moderateReviewUseCase = new ModerateReviewUseCase(adminRepository);
 const suspendUserUseCase = new SuspendUserUseCase(adminRepository);
 const grantProviderCapacityUseCase = new GrantProviderCapacityUseCase(adminRepository);
 
-export function useAdminPanel() {
+export function useAdminPanel(platformRole: Role) {
   const [reports, setReports] = useState<Report[]>([]);
   const [activeTab, setActiveTab] = useState<ReportStatus>('pending');
   const [categoryFilter, setCategoryFilter] = useState<'all' | ReportTargetType>('all');
-  const [platformRole, setPlatformRole] = useState<Role>('ADMIN');
   const [loading, setLoading] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
@@ -166,8 +165,6 @@ export function useAdminPanel() {
     setActiveTab,
     categoryFilter,
     setCategoryFilter,
-    platformRole,
-    setPlatformRole,
     canSuspendUser,
     canGrantProvider,
     canModerateListing,

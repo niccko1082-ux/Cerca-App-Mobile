@@ -17,12 +17,17 @@ import { ReportCard } from '@/components/admin/ReportCard';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { ReportTargetType } from '@/domain/admin/Report';
+import { Role } from '@/domain/auth/User';
 import { useTheme } from '@/hooks/use-theme';
 import { useAdminPanel } from '@/presentation/admin/hooks/useAdminPanel';
+import { useSession } from '@/presentation/auth/SessionContext';
 
 export default function AdminScreen() {
   const t = useTheme();
   const router = useRouter();
+  const { status, actor } = useSession();
+  // Cerca.md: platformRole es la autoridad de UI; el servidor sigue siendo la autoridad real.
+  const platformRole = (actor?.platformRole.toUpperCase() as Role) ?? 'USER';
   const {
     reports,
     pendingCount,
@@ -31,8 +36,6 @@ export default function AdminScreen() {
     setActiveTab,
     categoryFilter,
     setCategoryFilter,
-    platformRole,
-    setPlatformRole,
     canSuspendUser,
     canGrantProvider,
     canModerateListing,
@@ -47,7 +50,7 @@ export default function AdminScreen() {
     handleModerateReview,
     handleGrantProviderCapacity,
     handleSuspendUser,
-  } = useAdminPanel();
+  } = useAdminPanel(platformRole);
 
   const CATEGORY_CHIPS: { label: string; value: 'all' | ReportTargetType }[] = [
     { label: 'Todos', value: 'all' },
@@ -55,6 +58,14 @@ export default function AdminScreen() {
     { label: 'Reseñas', value: 'review' },
     { label: 'Usuarios', value: 'user' },
   ];
+
+  if (status === 'loading') {
+    return (
+      <SafeAreaView style={[styles.container, styles.fullscreenCentered, { backgroundColor: t.background }]}>
+        <ActivityIndicator size="large" color={t.primary} />
+      </SafeAreaView>
+    );
+  }
 
   // Guarda de Protección de Ruta de Cerca.md: si el usuario es 'USER' normal, bloquea la vista
   if (platformRole === 'USER') {
@@ -78,16 +89,6 @@ export default function AdminScreen() {
             <ThemedText style={[styles.emptySubtext, { color: t.icon }]}>
               No tienes permisos de Moderador ni Administrador para visualizar este panel.
             </ThemedText>
-
-            <TouchableOpacity
-              style={[styles.returnBtn, { backgroundColor: t.primary }]}
-              onPress={() => setPlatformRole('ADMIN')}
-              activeOpacity={0.8}
-            >
-              <ThemedText style={styles.returnBtnText}>
-                Probar con Rol Admin / Moderador
-              </ThemedText>
-            </TouchableOpacity>
           </ThemedView>
         </ScrollView>
       </SafeAreaView>
@@ -100,11 +101,10 @@ export default function AdminScreen() {
         contentContainerStyle={styles.scrollContent}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={refreshReports} />}
       >
-        {/* Header con Badge de Admin/Moderador interactivo */}
+        {/* Header con Badge de Admin/Moderador */}
         <AdminHeader
           onBackPress={() => router.back()}
           platformRole={platformRole}
-          onToggleRole={setPlatformRole}
         />
 
         {/* Banner de notificación de acción */}
@@ -230,6 +230,10 @@ export default function AdminScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  fullscreenCentered: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scrollContent: {
     padding: 20,

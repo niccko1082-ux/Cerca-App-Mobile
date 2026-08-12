@@ -4,6 +4,7 @@ import { ApiAuthAdapter } from "@/infrastructure/auth/ApiAuthAdapter";
 import { LocalBiometricAdapter } from "@/infrastructure/auth/LocalBiometricAdapter";
 import { BiometricLoginUseCase } from "@/application/auth/BiometricLoginUseCase";
 import { API_BASE_URL } from "@/constants/api";
+import { useSession } from "@/presentation/auth/SessionContext";
 
 const authRepository = new ApiAuthAdapter(API_BASE_URL);
 const biometricRepository = new LocalBiometricAdapter();
@@ -13,6 +14,7 @@ export function useBiometricLogin() {
     const [available, setAvailable] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { setSession } = useSession();
 
     useEffect(() => {
         (async () => {
@@ -26,7 +28,9 @@ export function useBiometricLogin() {
         setLoading(true);
         setError(null);
         try {
-            return await biometricLoginUseCase.execute();
+            const session = await biometricLoginUseCase.execute();
+            setSession(session);
+            return session;
         } catch (err) {
             setError(err instanceof Error ? err.message : 'No se pudo iniciar sesión con biometría.');
         } finally {

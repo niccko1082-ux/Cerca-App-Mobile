@@ -4,6 +4,7 @@ import { LoginUseCase } from '@/application/auth/SignInUseCase';
 import { API_BASE_URL } from '@/constants/api';
 import { AuthSession } from '@/domain/auth/User';
 import { ApiAuthAdapter } from '@/infrastructure/auth/ApiAuthAdapter';
+import { useSession } from '@/presentation/auth/SessionContext';
 import { isValidEmail } from '@/utils/validators';
 
 const authRepository = new ApiAuthAdapter(API_BASE_URL);
@@ -14,6 +15,7 @@ export function useLoginForm() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { setSession } = useSession();
 
   const handleSubmit = async (): Promise<AuthSession | undefined> => {
     setError(null);
@@ -32,7 +34,9 @@ export function useLoginForm() {
 
     setLoading(true);
     try {
-      return await loginUseCase.execute({ email, password });
+      const session = await loginUseCase.execute({ email, password });
+      setSession(session);
+      return session;
     } catch (err: any) {
       setError(err instanceof Error ? err.message : 'Credenciales incorrectas');
     } finally {

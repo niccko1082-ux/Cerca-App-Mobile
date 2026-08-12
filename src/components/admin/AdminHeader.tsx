@@ -8,16 +8,8 @@ import { Role } from '@/domain/auth/User';
 
 interface Props {
   onBackPress?: () => void;
-  platformRole?: Role;
-  onToggleRole?: (role: Role) => void;
+  platformRole: Role;
 }
-
-// Ciclo de roles completo: ADMIN → MODERATOR → USER → ADMIN
-const ROLE_CYCLE: Record<Role, Role> = {
-  ADMIN: 'MODERATOR',
-  MODERATOR: 'USER',
-  USER: 'ADMIN',
-};
 
 const ROLE_ICON: Record<Role, string> = {
   ADMIN: 'shield-crown',
@@ -25,7 +17,7 @@ const ROLE_ICON: Record<Role, string> = {
   USER: 'account',
 };
 
-export function AdminHeader({ onBackPress, platformRole = 'ADMIN', onToggleRole }: Props) {
+export function AdminHeader({ onBackPress, platformRole }: Props) {
   const t = useTheme();
 
   const getBadgeColor = () => {
@@ -48,18 +40,14 @@ export function AdminHeader({ onBackPress, platformRole = 'ADMIN', onToggleRole 
             Panel de Moderación
           </ThemedText>
 
-          <TouchableOpacity
-            style={[styles.adminBadge, { backgroundColor: getBadgeColor() }]}
-            onPress={() => onToggleRole?.(ROLE_CYCLE[platformRole])}
-            activeOpacity={0.8}
-          >
+          <View style={[styles.adminBadge, { backgroundColor: getBadgeColor() }]}>
             <MaterialCommunityIcons
               name={ROLE_ICON[platformRole] as any}
               size={14}
               color="#FFFFFF"
             />
             <ThemedText style={styles.adminBadgeText}>{platformRole}</ThemedText>
-          </TouchableOpacity>
+          </View>
         </View>
         <ThemedText style={[styles.subtitle, { color: t.icon }]}>
           Gestión de denuncias, moderación de anuncios (US-09) y control de plataforma ({platformRole})

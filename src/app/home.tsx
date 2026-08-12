@@ -1,6 +1,6 @@
 // src/app/home.tsx
-import React, { useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
@@ -8,28 +8,45 @@ import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useTheme } from '@/hooks/use-theme';
-import { ParticipantType, Role } from '@/domain/auth/User';
+import { has } from '@/domain/auth/actor';
+import { ParticipantType } from '@/domain/auth/User';
+import { useSession } from '@/presentation/auth/SessionContext';
 
 export default function HomeScreen() {
   const t = useTheme();
   const router = useRouter();
+  const { status, actor, signOut } = useSession();
   const [activeRole, setActiveRole] = useState<ParticipantType>('Cliente');
-  // Por defecto al registrarse el usuario es 'Cliente'. Puede habilitar ser 'Proveedor'.
-  const [hasProviderCapacity, setHasProviderCapacity] = useState(false);
+  // Optimismo local mientras llega la respuesta real de POST /me/capacities/provider (Cerca.md)
   const [requestSent, setRequestSent] = useState(false);
-  // Cerca.md: rol de plataforma del usuario autenticado (hardcoded hasta tener contexto global)
-  const [userPlatformRole] = useState<Role>('USER');
+
+  useEffect(() => {
+    if (status === 'signedOut') {
+      router.replace('/');
+    }
+  }, [status, router]);
+
+  if (!actor) {
+    return (
+      <SafeAreaView style={[styles.container, styles.centeredContainer, { backgroundColor: t.background }]}>
+        <ActivityIndicator size="large" color={t.primary} />
+      </SafeAreaView>
+    );
+  }
+
+  // Cerca.md: la capacidad manda si se ve el modo Proveedor, no un rol fijo
+  const hasProviderCapacity = has(actor, 'provider') || requestSent;
 
   // Cerca.md: solo moderator y admin ven el acceso al panel de moderación
-  const canAccessAdminPanel = userPlatformRole === 'ADMIN' || userPlatformRole === 'MODERATOR';
+  const canAccessAdminPanel = actor.platformRole === 'admin' || actor.platformRole === 'moderator';
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    await signOut();
     router.replace('/');
   };
 
   const handleRequestProvider = async () => {
     // Simula la llamada a POST /me/capacities/provider (Cerca.md)
-    setHasProviderCapacity(true);
     setRequestSent(true);
   };
 
@@ -295,6 +312,10 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  centeredContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scrollContent: {
     padding: 20,

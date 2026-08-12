@@ -5,6 +5,7 @@ import { API_BASE_URL } from '@/constants/api';
 import { singUpSchema } from '@/domain/auth/schemas/auth.schema';
 import { AuthSession } from '@/domain/auth/User';
 import { ApiAuthAdapter } from '@/infrastructure/auth/ApiAuthAdapter';
+import { useSession } from '@/presentation/auth/SessionContext';
 
 const authRepository = new ApiAuthAdapter(API_BASE_URL);
 const signUpUseCase = new SignUpUseCase(authRepository);
@@ -16,6 +17,7 @@ export function useRegisterForm() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { setSession } = useSession();
 
   const handleNameChange = (text: string) => {
     setName(text);
@@ -73,6 +75,7 @@ export function useRegisterForm() {
         email: email.trim(),
         password,
       });
+      setSession(session);
       return session;
     } catch (err: any) {
       setError(err instanceof Error ? err.message : 'Error al registrar el usuario.');
