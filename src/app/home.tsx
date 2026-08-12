@@ -8,16 +8,29 @@ import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useTheme } from '@/hooks/use-theme';
-import { ParticipantType } from '@/domain/auth/User';
+import { ParticipantType, Role } from '@/domain/auth/User';
 
 export default function HomeScreen() {
   const t = useTheme();
   const router = useRouter();
   const [activeRole, setActiveRole] = useState<ParticipantType>('Cliente');
+  // Por defecto al registrarse el usuario es 'Cliente'. Puede habilitar ser 'Proveedor'.
+  const [hasProviderCapacity, setHasProviderCapacity] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
+  // Cerca.md: rol de plataforma del usuario autenticado (hardcoded hasta tener contexto global)
+  const [userPlatformRole] = useState<Role>('USER');
+
+  // Cerca.md: solo moderator y admin ven el acceso al panel de moderación
+  const canAccessAdminPanel = userPlatformRole === 'ADMIN' || userPlatformRole === 'MODERATOR';
 
   const handleSignOut = () => {
-    // Redirigir de nuevo a la pantalla de Login
     router.replace('/');
+  };
+
+  const handleRequestProvider = async () => {
+    // Simula la llamada a POST /me/capacities/provider (Cerca.md)
+    setHasProviderCapacity(true);
+    setRequestSent(true);
   };
 
   return (
@@ -37,57 +50,81 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Switcher de Vista: Cliente vs Proveedor */}
-        <View style={[styles.switchContainer, { backgroundColor: t.card, borderColor: t.border }]}>
+        {/* Acceso al Panel de Moderación y Admin — solo visible para roles con permiso */}
+        {canAccessAdminPanel && (
           <TouchableOpacity
-            style={[
-              styles.switchButton,
-              activeRole === 'Cliente' && { backgroundColor: t.primary },
-            ]}
-            onPress={() => setActiveRole('Cliente')}
+            style={[styles.adminAccessCard, { backgroundColor: t.card, borderColor: t.roleAdmin ?? '#F18933' }]}
+            onPress={() => router.push('/admin')}
             activeOpacity={0.8}
           >
-            <MaterialCommunityIcons
-              name="account"
-              size={18}
-              color={activeRole === 'Cliente' ? '#FFFFFF' : t.icon}
-            />
-            <ThemedText
-              style={[
-                styles.switchText,
-                { color: activeRole === 'Cliente' ? '#FFFFFF' : t.text },
-              ]}
-            >
-              Modo Cliente
-            </ThemedText>
+            <View style={styles.adminAccessRow}>
+              <MaterialCommunityIcons name="shield-crown-outline" size={24} color={t.roleAdmin ?? '#F18933'} />
+              <View style={{ flex: 1 }}>
+                <ThemedText style={[styles.adminAccessTitle, { color: t.text }]}>
+                  Panel de Moderación (Admin)
+                </ThemedText>
+                <ThemedText style={[styles.adminAccessSubtitle, { color: t.icon }]}>
+                  Gestionar denuncias, solicitudes y moderar plataforma
+                </ThemedText>
+              </View>
+              <MaterialCommunityIcons name="chevron-right" size={22} color={t.icon} />
+            </View>
           </TouchableOpacity>
+        )}
 
-          <TouchableOpacity
-            style={[
-              styles.switchButton,
-              activeRole === 'Proveedor' && { backgroundColor: t.primary },
-            ]}
-            onPress={() => setActiveRole('Proveedor')}
-            activeOpacity={0.8}
-          >
-            <FontAwesome
-              name="wrench"
-              size={16}
-              color={activeRole === 'Proveedor' ? '#FFFFFF' : t.icon}
-            />
-            <ThemedText
+        {/* Switcher de Vista: Cliente vs Proveedor (si tiene la capacidad habilitada) */}
+        {hasProviderCapacity ? (
+          <View style={[styles.switchContainer, { backgroundColor: t.card, borderColor: t.border }]}>
+            <TouchableOpacity
               style={[
-                styles.switchText,
-                { color: activeRole === 'Proveedor' ? '#FFFFFF' : t.text },
+                styles.switchButton,
+                activeRole === 'Cliente' && { backgroundColor: t.primary },
               ]}
+              onPress={() => setActiveRole('Cliente')}
+              activeOpacity={0.8}
             >
-              Modo Proveedor
-            </ThemedText>
-          </TouchableOpacity>
-        </View>
+              <MaterialCommunityIcons
+                name="account"
+                size={18}
+                color={activeRole === 'Cliente' ? '#FFFFFF' : t.icon}
+              />
+              <ThemedText
+                style={[
+                  styles.switchText,
+                  { color: activeRole === 'Cliente' ? '#FFFFFF' : t.text },
+                ]}
+              >
+                Modo Cliente
+              </ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.switchButton,
+                activeRole === 'Proveedor' && { backgroundColor: t.primary },
+              ]}
+              onPress={() => setActiveRole('Proveedor')}
+              activeOpacity={0.8}
+            >
+              <FontAwesome
+                name="wrench"
+                size={16}
+                color={activeRole === 'Proveedor' ? '#FFFFFF' : t.icon}
+              />
+              <ThemedText
+                style={[
+                  styles.switchText,
+                  { color: activeRole === 'Proveedor' ? '#FFFFFF' : t.text },
+                ]}
+              >
+                Modo Proveedor
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
+        ) : null}
 
         {/* VISTA SEGÚN EL ROL SELECCIONADO */}
-        {activeRole === 'Cliente' ? (
+        {activeRole === 'Cliente' || !hasProviderCapacity ? (
           <>
             {/* Tarjeta Informativa Cliente */}
             <ThemedView style={[styles.card, { backgroundColor: t.card }]}>
@@ -101,6 +138,34 @@ export default function HomeScreen() {
                 Explora servicios locales cerca de ti, solicita reservas y contacta profesionales capacitados.
               </ThemedText>
             </ThemedView>
+
+            {/* Banner para solicitar ser Proveedor si no tiene la capacidad aún */}
+            {!hasProviderCapacity && (
+              <ThemedView style={[styles.providerBanner, { backgroundColor: t.card, borderColor: t.border }]}>
+                <View style={styles.providerBannerContent}>
+                  <FontAwesome name="wrench" size={22} color={t.primary} />
+                  <View style={{ flex: 1 }}>
+                    <ThemedText style={[styles.providerBannerTitle, { color: t.text }]}>
+                      ¿Quieres ofrecer tus servicios en Cerca?
+                    </ThemedText>
+                    <ThemedText style={[styles.providerBannerSub, { color: t.icon }]}>
+                      Activa tu capacidad de Proveedor para publicar anuncios y recibir reservas de clientes.
+                    </ThemedText>
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  style={[styles.requestBtn, { backgroundColor: t.primary }]}
+                  onPress={handleRequestProvider}
+                  activeOpacity={0.8}
+                >
+                  <MaterialCommunityIcons name="briefcase-plus" size={18} color="#FFFFFF" />
+                  <ThemedText style={styles.requestBtnText}>
+                    Habilitar Modo Proveedor
+                  </ThemedText>
+                </TouchableOpacity>
+              </ThemedView>
+            )}
 
             {/* Accesos rápidos Cliente */}
             <ThemedText style={[styles.sectionHeader, { color: t.text }]}>
@@ -156,7 +221,7 @@ export default function HomeScreen() {
               <View style={styles.roleHeader}>
                 <FontAwesome name="wrench" size={20} color={t.primary} />
                 <ThemedText style={[styles.roleTitle, { color: t.text }]}>
-                  Vista como Proveedor
+                  Vista como Proveedor (Habilitado)
                 </ThemedText>
               </View>
               <ThemedText style={[styles.roleSubtext, { color: t.icon }]}>
@@ -253,6 +318,29 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 20,
   },
+  adminAccessCard: {
+    borderRadius: 14,
+    borderWidth: 1.5,
+    padding: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  adminAccessRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  adminAccessTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  adminAccessSubtitle: {
+    fontSize: 12,
+    marginTop: 2,
+  },
   switchContainer: {
     flexDirection: 'row',
     borderRadius: 12,
@@ -282,6 +370,39 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 2,
+  },
+  providerBanner: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+    gap: 14,
+  },
+  providerBannerContent: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  providerBannerTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  providerBannerSub: {
+    fontSize: 13,
+    marginTop: 4,
+    lineHeight: 18,
+  },
+  requestBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 10,
+  },
+  requestBtnText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   roleHeader: {
     flexDirection: 'row',
