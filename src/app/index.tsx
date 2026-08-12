@@ -1,8 +1,7 @@
 // src/app/index.tsx
-import React from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { ScrollView, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CredentialsInput } from '@/components/auth/CredentialsInput';
 import { LoginHeader } from '@/components/auth/LoginHeader';
@@ -13,16 +12,15 @@ import { ThemedView } from '@/components/themed-view';
 
 import { useLoginForm } from '@/presentation/auth/hooks/useLoginForm';
 import { useBiometricLogin } from '@/presentation/auth/hooks/useBiometricLogin';
+import { ThemedView } from '@/components/themed-view';
+
 import { useTheme } from '@/hooks/use-theme';
+import { useLoginForm } from '@/presentation/auth/hooks/useLoginForm';
 
 export default function HomeScreen() {
   const t = useTheme();
   const router = useRouter();
   const {
-    participantType,
-    setParticipantType,
-    role,
-    setRole,
     email,
     setEmail,
     password,
@@ -38,9 +36,15 @@ export default function HomeScreen() {
     error: biometricError,
     login: biometricLogin,
   } = useBiometricLogin();
+  const handleLoginSubmit = async () => {
+    const session = await handleSubmit();
+    if (session) {
+      router.replace('/home');
+    }
+  };
 
   const handleRegisterPress = () => {
-    // Redirige a la pantalla de registro (o la ruta destinada para el registro)
+    // Redirige a la pantalla de registro
     router.push('/register');
   };
 
@@ -50,21 +54,15 @@ export default function HomeScreen() {
         <LoginHeader />
 
         <ThemedView style={[styles.card, { backgroundColor: t.card }]}>
-          <ParticipantSelector
-            selected={participantType}
-            onSelect={setParticipantType}
-          />
-          <RoleSelector selected={role} onSelect={setRole} />
-          
           <CredentialsInput
             email={email}
             onChangeEmail={setEmail}
             password={password}
             onChangePassword={setPassword}
-            onSubmit={handleSubmit}
+            onSubmit={handleLoginSubmit}
             onPressRegister={handleRegisterPress}
             isLoading={loading}
-            error={error}
+            errorMessage={error}
           />
 
           {biometricAvailable && (

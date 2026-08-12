@@ -9,9 +9,33 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useTheme } from '@/hooks/use-theme';
 
+import { RegisterForm } from '@/components/auth/RegisterForm';
+import { useRegisterForm } from '@/presentation/auth/hooks/useRegisterForm';
+
 export default function RegisterScreen() {
   const t = useTheme();
   const router = useRouter();
+
+  const {
+    name,
+    setName,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    confirmPassword,
+    setConfirmPassword,
+    loading,
+    error,
+    handleRegister,
+  } = useRegisterForm();
+
+  const onSubmit = async () => {
+    const session = await handleRegister();
+    if (session) {
+      router.replace('/home');
+    }
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: t.background }]}>
@@ -33,9 +57,19 @@ export default function RegisterScreen() {
         </ThemedText>
 
         <ThemedView style={[styles.card, { backgroundColor: t.card }]}>
-          <ThemedText style={[styles.placeholderText, { color: t.text }]}>
-            Pantalla de Registro (En construcción)
-          </ThemedText>
+          <RegisterForm
+            name={name}
+            onChangeName={setName}
+            email={email}
+            onChangeEmail={setEmail}
+            password={password}
+            onChangePassword={setPassword}
+            confirmPassword={confirmPassword}
+            onChangeConfirmPassword={setConfirmPassword}
+            onSubmit={onSubmit}
+            isLoading={loading}
+            errorMessage={error}
+          />
         </ThemedView>
       </ScrollView>
     </SafeAreaView>
@@ -77,9 +111,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 3,
-    alignItems: 'center',
-  },
-  placeholderText: {
-    fontSize: 16,
   },
 });
