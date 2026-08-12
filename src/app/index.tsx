@@ -1,26 +1,19 @@
 // src/app/index.tsx
-import React from 'react';
+import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 
-import { CredentialsInput } from '@/components/auth/CredentialsInput'; 
+import { CredentialsInput } from '@/components/auth/CredentialsInput';
 import { LoginHeader } from '@/components/auth/LoginHeader';
-import { ParticipantSelector } from '@/components/auth/ParticipantSelector';
-import { RoleSelector } from '@/components/auth/RoleSelector';
 import { ThemedView } from '@/components/themed-view';
 
-import { useLoginForm } from '@/presentation/auth/hooks/useLoginForm';
 import { useTheme } from '@/hooks/use-theme';
+import { useLoginForm } from '@/presentation/auth/hooks/useLoginForm';
 
 export default function HomeScreen() {
   const t = useTheme();
   const router = useRouter();
   const {
-    participantType,
-    setParticipantType,
-    role,
-    setRole,
     email,
     setEmail,
     password,
@@ -30,8 +23,15 @@ export default function HomeScreen() {
     handleSubmit,
   } = useLoginForm();
 
+  const handleLoginSubmit = async () => {
+    const session = await handleSubmit();
+    if (session) {
+      router.replace('/home');
+    }
+  };
+
   const handleRegisterPress = () => {
-    // Redirige a la pantalla de registro (o la ruta destinada para el registro)
+    // Redirige a la pantalla de registro
     router.push('/register');
   };
 
@@ -41,21 +41,15 @@ export default function HomeScreen() {
         <LoginHeader />
 
         <ThemedView style={[styles.card, { backgroundColor: t.card }]}>
-          <ParticipantSelector
-            selected={participantType}
-            onSelect={setParticipantType}
-          />
-          <RoleSelector selected={role} onSelect={setRole} />
-          
           <CredentialsInput
             email={email}
             onChangeEmail={setEmail}
             password={password}
             onChangePassword={setPassword}
-            onSubmit={handleSubmit}
+            onSubmit={handleLoginSubmit}
             onPressRegister={handleRegisterPress}
             isLoading={loading}
-            error={error}
+            errorMessage={error}
           />
         </ThemedView>
       </ScrollView>

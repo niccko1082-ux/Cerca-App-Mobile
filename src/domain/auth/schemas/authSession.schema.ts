@@ -1,15 +1,21 @@
 import { z } from 'zod';
 
 export const userSchema = z.object({
-    id: z.string(),
-    email: z.string().email(),
+    id: z.union([z.string(), z.number()]).transform((val) => String(val)),
+    email: z.string().optional().default(''),
     name: z.string().optional(),
-});
+    displayName: z.string().optional(),
+}).passthrough();
 
 export const authSessionSchema = z.object({
     accessToken: z.string(),
-    refreshToken: z.string(),
-    user: userSchema,
-});
+    refreshToken: z.string().optional().default(''),
+    user: userSchema.optional(),
+    actor: userSchema.optional(),
+}).transform((data) => ({
+    accessToken: data.accessToken,
+    refreshToken: data.refreshToken,
+    user: data.user || data.actor || { id: '1', email: '', name: '' },
+}));
 
 export type AuthSessionDTO = z.infer<typeof authSessionSchema>;
