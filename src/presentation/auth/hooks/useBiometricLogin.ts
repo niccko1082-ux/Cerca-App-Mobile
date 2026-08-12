@@ -3,9 +3,9 @@ import { AuthSession } from "@/domain/auth/User";
 import { ApiAuthAdapter } from "@/infrastructure/auth/ApiAuthAdapter";
 import { LocalBiometricAdapter } from "@/infrastructure/auth/LocalBiometricAdapter";
 import { BiometricLoginUseCase } from "@/application/auth/BiometricLoginUseCase";
+import { API_BASE_URL } from "@/constants/api";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3333';
-const authRepository = new ApiAuthAdapter(API_URL);
+const authRepository = new ApiAuthAdapter(API_BASE_URL);
 const biometricRepository = new LocalBiometricAdapter();
 const biometricLoginUseCase = new BiometricLoginUseCase(authRepository, biometricRepository);
 
@@ -16,7 +16,7 @@ export function useBiometricLogin() {
 
     useEffect(() => {
         (async () => {
-            const {hasHardware, isEnrolled} = await biometricRepository.getAvailability();
+            const { hasHardware, isEnrolled } = await biometricRepository.getAvailability();
             const storedSession = await authRepository.getStoredSession();
             setAvailable(hasHardware && isEnrolled && !!storedSession);
         })();

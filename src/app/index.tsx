@@ -1,20 +1,15 @@
 // src/app/index.tsx
 import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CredentialsInput } from '@/components/auth/CredentialsInput';
 import { LoginHeader } from '@/components/auth/LoginHeader';
-import { ParticipantSelector } from '@/components/auth/ParticipantSelector';
-import { RoleSelector } from '@/components/auth/RoleSelector';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 
-import { useLoginForm } from '@/presentation/auth/hooks/useLoginForm';
-import { useBiometricLogin } from '@/presentation/auth/hooks/useBiometricLogin';
-import { ThemedView } from '@/components/themed-view';
-
 import { useTheme } from '@/hooks/use-theme';
+import { useBiometricLogin } from '@/presentation/auth/hooks/useBiometricLogin';
 import { useLoginForm } from '@/presentation/auth/hooks/useLoginForm';
 
 export default function HomeScreen() {
@@ -36,8 +31,16 @@ export default function HomeScreen() {
     error: biometricError,
     login: biometricLogin,
   } = useBiometricLogin();
+
   const handleLoginSubmit = async () => {
     const session = await handleSubmit();
+    if (session) {
+      router.replace('/home');
+    }
+  };
+
+  const handleBiometricPress = async () => {
+    const session = await biometricLogin();
     if (session) {
       router.replace('/home');
     }
@@ -68,13 +71,13 @@ export default function HomeScreen() {
           {biometricAvailable && (
             <Pressable
               style={styles.biometricButton}
-              onPress={biometricLogin}
+              onPress={handleBiometricPress}
               disabled={biometricLoading}
             >
               {biometricLoading ? (
                 <ActivityIndicator color={t.primary} />
               ) : (
-                <ThemedText style={{ color: t.primary }}>
+                <ThemedText style={{ color: t.primary, fontWeight: '600' }}>
                   Iniciar sesión con biometría
                 </ThemedText>
               )}
@@ -108,7 +111,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   biometricButton: {
-    marginTop: 12,
+    marginTop: 16,
     alignItems: 'center',
     paddingVertical: 10,
   },
