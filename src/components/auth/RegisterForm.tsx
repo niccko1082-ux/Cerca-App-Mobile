@@ -1,4 +1,4 @@
-// src/components/auth/CredentialsInput.tsx
+// src/components/auth/RegisterForm.tsx
 import React from 'react';
 import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { CustomInput } from '@/components/common/CustomInput';
@@ -6,36 +6,47 @@ import { ThemedText } from '@/components/themed-text';
 import { useTheme } from '@/hooks/use-theme';
 
 interface Props {
+  name: string;
+  onChangeName: (text: string) => void;
   email: string;
   onChangeEmail: (text: string) => void;
   password: string;
   onChangePassword: (text: string) => void;
-  onSubmit?: () => void;
-  submitButtonText?: string;
-  onPressRegister?: () => void;
+  confirmPassword: string;
+  onChangeConfirmPassword: (text: string) => void;
+  onSubmit: () => void;
   isLoading?: boolean;
-  error?: string | null;
   errorMessage?: string | null;
 }
 
-export function CredentialsInput({
+export function RegisterForm({
+  name,
+  onChangeName,
   email,
   onChangeEmail,
   password,
   onChangePassword,
+  confirmPassword,
+  onChangeConfirmPassword,
   onSubmit,
-  submitButtonText = 'Iniciar sesión',
-  onPressRegister,
   isLoading = false,
-  error,
   errorMessage,
 }: Props) {
   const t = useTheme();
-  const displayError = error || errorMessage;
 
   return (
     <View style={styles.container}>
-      {/* Campo de Correo Electrónico */}
+      {/* Campo Nombre Completo */}
+      <CustomInput
+        label="Nombre completo"
+        iconName="account-outline"
+        placeholder="Tu nombre completo"
+        value={name}
+        onChangeText={onChangeName}
+        autoCapitalize="words"
+      />
+
+      {/* Campo Correo Electrónico */}
       <CustomInput
         label="Correo electrónico"
         iconName="email-outline"
@@ -46,7 +57,7 @@ export function CredentialsInput({
         autoCapitalize="none"
       />
 
-      {/* Campo de Contraseña */}
+      {/* Campo Contraseña con helperText acorde a singUpSchema */}
       <CustomInput
         label="Contraseña"
         iconName="lock-outline"
@@ -54,14 +65,25 @@ export function CredentialsInput({
         value={password}
         onChangeText={onChangePassword}
         isPassword
+        helperText="Debe contener al menos 8 caracteres, un número y una letra mayúscula."
       />
 
-      {/* Mensaje de error si ocurre algún fallo */}
-      {displayError ? (
-        <ThemedText style={styles.errorText}>{displayError}</ThemedText>
+      {/* Campo Confirmar Contraseña */}
+      <CustomInput
+        label="Confirmar contraseña"
+        iconName="lock-check-outline"
+        placeholder="••••••••"
+        value={confirmPassword}
+        onChangeText={onChangeConfirmPassword}
+        isPassword
+      />
+
+      {/* Mensaje de error si la respuesta del backend o formulario falla */}
+      {errorMessage ? (
+        <ThemedText style={styles.errorText}>{errorMessage}</ThemedText>
       ) : null}
 
-      {/* Botón de Enviar Formulario */}
+      {/* Botón de Registro */}
       <TouchableOpacity
         style={[styles.submitButton, { backgroundColor: t.primary }]}
         onPress={onSubmit}
@@ -71,29 +93,18 @@ export function CredentialsInput({
         {isLoading ? (
           <ActivityIndicator color="#FFFFFF" />
         ) : (
-          <ThemedText style={styles.submitButtonText}>{submitButtonText}</ThemedText>
+          <ThemedText style={styles.submitButtonText}>Crear cuenta</ThemedText>
         )}
       </TouchableOpacity>
-
-      {/* Opción para registrarse (se muestra si se provee onPressRegister) */}
-      {onPressRegister && (
-        <View style={styles.registerContainer}>
-          <ThemedText style={[styles.registerText, { color: t.text }]}>
-            ¿No tienes una cuenta?{' '}
-          </ThemedText>
-          <TouchableOpacity onPress={onPressRegister} activeOpacity={0.7}>
-            <ThemedText style={[styles.registerLink, { color: t.primary }]}>
-              Regístrate
-            </ThemedText>
-          </TouchableOpacity>
-        </View>
-      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { gap: 16 },
+  container: {
+    width: '100%',
+    gap: 16,
+  },
   errorText: {
     color: '#FF3B30',
     fontSize: 13,
@@ -110,19 +121,5 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  registerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  registerText: {
-    fontSize: 14,
-  },
-  registerLink: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    textDecorationLine: 'underline',
   },
 });
