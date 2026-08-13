@@ -23,6 +23,7 @@ export default function HomeScreen() {
   const { actor: rawActor, signOut } = useSession();
   const actor = rawActor!;
   const [activeRole, setActiveRole] = useState<ParticipantType>('Cliente');
+  const [signingOut, setSigningOut] = useState(false);
   const {
     requestProvider,
     loading: requestProviderLoading,
@@ -37,6 +38,8 @@ export default function HomeScreen() {
 
   // (protected)/_layout.tsx redirige a '/' en cuanto status pasa a 'signedOut'.
   const handleSignOut = async () => {
+    if (signingOut) return;
+    setSigningOut(true);
     await signOut();
   };
 
@@ -357,9 +360,16 @@ export default function HomeScreen() {
           style={[styles.logoutButton, { borderColor: t.border }]}
           onPress={handleSignOut}
           activeOpacity={0.7}
+          disabled={signingOut}
         >
-          <MaterialCommunityIcons name="logout" size={20} color="#FF3B30" />
-          <ThemedText style={styles.logoutText}>{translate('home.signOut')}</ThemedText>
+          {signingOut ? (
+            <ActivityIndicator color="#FF3B30" size="small" />
+          ) : (
+            <>
+              <MaterialCommunityIcons name="logout" size={20} color="#FF3B30" />
+              <ThemedText style={styles.logoutText}>{translate('home.signOut')}</ThemedText>
+            </>
+          )}
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

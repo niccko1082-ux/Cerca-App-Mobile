@@ -30,7 +30,10 @@ export class ApiAuthAdapter implements AuthRepository {
 
   async signOut(): Promise<void> {
     const session = await this.getStoredSession();
-    if (session?.accessToken) {
+    // Una sesión guardada por una versión anterior de la app (o corrupta) puede
+    // no traer refreshToken — el backend rechaza el sign-out sin él, así que
+    // ni se intenta: la sesión local se limpia igual abajo.
+    if (session?.accessToken && session.refreshToken) {
       await this.postRequest(
         '/v1/auth/sign-out',
         { refreshToken: session.refreshToken },
