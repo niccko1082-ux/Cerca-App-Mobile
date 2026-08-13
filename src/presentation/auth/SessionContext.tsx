@@ -1,5 +1,6 @@
 // src/presentation/auth/SessionContext.tsx
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { CheckoutAuthUseCase } from '@/application/auth/CheckAuthUseCase';
 import { SignOutUseCase } from '@/application/auth/SingOutUseCase';
@@ -38,6 +39,7 @@ const SessionContext = createContext<SessionContextValue | undefined>(undefined)
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<SessionStatus>('loading');
   const [user, setUser] = useState<User | null>(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     (async () => {
@@ -51,16 +53,24 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     })();
   }, []);
 
-  const setSession = useCallback((session: AuthSession) => {
-    setUser(session.user);
-    setStatus('signedIn');
-  }, []);
+  const setSession = useCallback(
+    (session: AuthSession) => {
+      // Si alguien inicia sesión con otra cuenta sin haber cerrado la anterior
+      // (ej. tras forzar el cierre de la app), la caché de React Query todavía
+      // tendría las reservas/anuncios de la cuenta previa hasta que se refresque.
+      queryClient.clear();
+      setUser(session.user);
+      setStatus('signedIn');
+    },
+    [queryClient],
+  );
 
   const signOut = useCallback(async () => {
     await signOutUseCase.execute();
+    queryClient.clear();
     setUser(null);
     setStatus('signedOut');
-  }, []);
+  }, [queryClient]);
 
   const actor = user ? toActor(user) : null;
 

@@ -1,11 +1,13 @@
-// src/app/index.tsx
+// src/app/(public)/index.tsx
 import { useRouter } from 'expo-router';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 import { CredentialsInput } from '@/components/auth/CredentialsInput';
 import { LoginHeader } from '@/components/auth/LoginHeader';
 import { ThemedText } from '@/components/themed-text';
+import { ErrorText } from '@/components/common/ErrorText';
 import { ThemedView } from '@/components/themed-view';
 
 import { useTheme } from '@/hooks/use-theme';
@@ -15,15 +17,8 @@ import { useLoginForm } from '@/presentation/auth/hooks/useLoginForm';
 export default function HomeScreen() {
   const t = useTheme();
   const router = useRouter();
-  const {
-    email,
-    setEmail,
-    password,
-    setPassword,
-    loading,
-    error,
-    handleSubmit,
-  } = useLoginForm();
+  const { t: translate } = useTranslation();
+  const { email, setEmail, password, setPassword, loading, error, handleSubmit } = useLoginForm();
 
   const {
     available: biometricAvailable,
@@ -78,14 +73,12 @@ export default function HomeScreen() {
                 <ActivityIndicator color={t.primary} />
               ) : (
                 <ThemedText style={{ color: t.primary, fontWeight: '600' }}>
-                  Iniciar sesión con biometría
+                  {translate('auth.login.biometric')}
                 </ThemedText>
               )}
             </Pressable>
           )}
-          {biometricError ? (
-            <ThemedText style={styles.errorText}>{biometricError}</ThemedText>
-          ) : null}
+          {biometricError ? <ErrorText>{biometricError}</ErrorText> : null}
         </ThemedView>
       </ScrollView>
     </SafeAreaView>

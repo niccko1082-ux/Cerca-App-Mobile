@@ -22,7 +22,14 @@ export interface Actor {
 // Cerca.md · Matriz de permisos por Capacidad
 const CAPACITY_PERMISSIONS: Record<Capacity, Permission[]> = {
   customer: ['listing:read', 'booking:request', 'review:write'],
-  provider: ['listing:read', 'listing:create', 'listing:update', 'booking:request', 'booking:accept', 'review:write'],
+  provider: [
+    'listing:read',
+    'listing:create',
+    'listing:update',
+    'booking:request',
+    'booking:accept',
+    'review:write',
+  ],
 };
 
 // Cerca.md · Matriz de permisos por Rol de Plataforma
@@ -60,7 +67,9 @@ export const has = (actor: Actor, capacity: Capacity): boolean => {
  * Evalúa si un Actor tiene permiso para realizar una acción basada en sus Capacidades o Rol de Plataforma.
  */
 export const can = (actor: Actor, permission: Permission): boolean => {
-  const fromCapacities = actor.capacities.some((c) => CAPACITY_PERMISSIONS[c]?.includes(permission));
+  const fromCapacities = actor.capacities.some((c) =>
+    CAPACITY_PERMISSIONS[c]?.includes(permission),
+  );
   const fromRole = PLATFORM_PERMISSIONS[actor.platformRole]?.includes(permission);
   return fromCapacities || fromRole;
 };

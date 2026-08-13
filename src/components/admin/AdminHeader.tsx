@@ -2,7 +2,9 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/themed-text';
+import { TOUCH_HIT_SLOP } from '@/constants/accessibility';
 import { useTheme } from '@/hooks/use-theme';
 import { Role } from '@/domain/auth/User';
 
@@ -19,6 +21,7 @@ const ROLE_ICON: Record<Role, string> = {
 
 export function AdminHeader({ onBackPress, platformRole }: Props) {
   const t = useTheme();
+  const { t: translate } = useTranslation();
 
   const getBadgeColor = () => {
     if (platformRole === 'ADMIN') return t.roleAdmin ?? '#F18933';
@@ -29,7 +32,14 @@ export function AdminHeader({ onBackPress, platformRole }: Props) {
   return (
     <View style={styles.container}>
       {onBackPress && (
-        <TouchableOpacity style={styles.backButton} onPress={onBackPress} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={onBackPress}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={translate('common.back')}
+          hitSlop={TOUCH_HIT_SLOP}
+        >
           <MaterialCommunityIcons name="arrow-left" size={24} color={t.text} />
         </TouchableOpacity>
       )}
@@ -37,7 +47,7 @@ export function AdminHeader({ onBackPress, platformRole }: Props) {
       <View style={styles.titleContainer}>
         <View style={styles.headlineRow}>
           <ThemedText type="title" style={[styles.title, { color: t.text }]}>
-            Panel de Moderación
+            {translate('admin.panelTitle')}
           </ThemedText>
 
           <View style={[styles.adminBadge, { backgroundColor: getBadgeColor() }]}>
@@ -50,7 +60,7 @@ export function AdminHeader({ onBackPress, platformRole }: Props) {
           </View>
         </View>
         <ThemedText style={[styles.subtitle, { color: t.icon }]}>
-          Gestión de denuncias, moderación de anuncios (US-09) y control de plataforma ({platformRole})
+          {translate('admin.panelSubtitle', { role: platformRole })}
         </ThemedText>
       </View>
     </View>

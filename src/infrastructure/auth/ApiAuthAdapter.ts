@@ -31,9 +31,22 @@ export class ApiAuthAdapter implements AuthRepository {
   async signOut(): Promise<void> {
     const session = await this.getStoredSession();
     if (session?.accessToken) {
-      await this.postRequest('/v1/auth/sign-out', {}, z.unknown(), session.accessToken);
+      await this.postRequest(
+        '/v1/auth/sign-out',
+        { refreshToken: session.refreshToken },
+        z.unknown(),
+        session.accessToken,
+      );
     }
     await SecureStore.deleteItemAsync(SESSION_KEY);
+  }
+
+  async requestProviderCapacity(): Promise<void> {
+    const session = await this.getStoredSession();
+    if (!session?.accessToken) {
+      throw new Error('No hay una sesión activa.');
+    }
+    await this.postRequest('/v1/me/capacities/provider', {}, z.unknown(), session.accessToken);
   }
 
   async saveSession(session: AuthSession): Promise<void> {
@@ -50,7 +63,7 @@ export class ApiAuthAdapter implements AuthRepository {
     endpoint: string,
     body: object,
     schema: z.ZodType<T>,
-    token?: string
+    token?: string,
   ): Promise<T> {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;

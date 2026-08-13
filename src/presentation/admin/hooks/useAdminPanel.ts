@@ -1,7 +1,6 @@
 // src/presentation/admin/hooks/useAdminPanel.ts
 import { useEffect, useState } from 'react';
 import { GetReportsUseCase } from '@/application/admin/GetReportsUseCase';
-import { GrantProviderCapacityUseCase } from '@/application/admin/GrantProviderCapacityUseCase';
 import { ModerateListingUseCase } from '@/application/admin/ModerateListingUseCase';
 import { ModerateReviewUseCase } from '@/application/admin/ModerateReviewUseCase';
 import { ResolveReportUseCase } from '@/application/admin/ResolveReportUseCase';
@@ -23,7 +22,6 @@ const resolveReportUseCase = new ResolveReportUseCase(adminRepository);
 const moderateListingUseCase = new ModerateListingUseCase(adminRepository);
 const moderateReviewUseCase = new ModerateReviewUseCase(adminRepository);
 const suspendUserUseCase = new SuspendUserUseCase(adminRepository);
-const grantProviderCapacityUseCase = new GrantProviderCapacityUseCase(adminRepository);
 
 export function useAdminPanel(platformRole: Role) {
   const [reports, setReports] = useState<Report[]>([]);
@@ -34,9 +32,6 @@ export function useAdminPanel(platformRole: Role) {
 
   // Cerca.md: user:suspend → solo ADMIN
   const canSuspendUser = platformRole === 'ADMIN';
-
-  // Cerca.md: grantProviderCapacity → solo ADMIN (gestión de capacidades)
-  const canGrantProvider = platformRole === 'ADMIN';
 
   // Cerca.md: listing:moderate → MODERATOR y ADMIN
   const canModerateListing = platformRole === 'ADMIN' || platformRole === 'MODERATOR';
@@ -60,6 +55,8 @@ export function useAdminPanel(platformRole: Role) {
   };
 
   useEffect(() => {
+    // Carga inicial única al montar — no es un ciclo de renders en cascada.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchReports();
   }, []);
 
@@ -89,7 +86,7 @@ export function useAdminPanel(platformRole: Role) {
         reason: 'Acción ejecutada desde el Panel de Moderación.',
       });
       setActionMessage(
-        `Anuncio marcado como ${status === 'under_review' ? 'En Revisión' : 'Retirado'}.`
+        `Anuncio marcado como ${status === 'under_review' ? 'En Revisión' : 'Retirado'}.`,
       );
       fetchReports();
     } catch (err: any) {
@@ -97,7 +94,11 @@ export function useAdminPanel(platformRole: Role) {
     }
   };
 
-  const handleModerateReview = async (reviewId: string, status: ReviewModerationStatus, authorId?: string) => {
+  const handleModerateReview = async (
+    reviewId: string,
+    status: ReviewModerationStatus,
+    authorId?: string,
+  ) => {
     if (!canModerateReview) {
       setActionMessage('Error: No tienes permiso para moderar reseñas.');
       return;
@@ -110,26 +111,12 @@ export function useAdminPanel(platformRole: Role) {
           reason: 'Moderación de reseña denunciada.',
           actorId: 'usr-current-logged-in',
         },
-        authorId
+        authorId,
       );
       setActionMessage('Reseña ocultada de la plataforma.');
       fetchReports();
     } catch (err: any) {
       setActionMessage(err instanceof Error ? err.message : 'Error al moderar reseña.');
-    }
-  };
-
-  const handleGrantProviderCapacity = async (userId: string) => {
-    if (!canGrantProvider) {
-      setActionMessage('Error: Únicamente los administradores pueden otorgar capacidad de Proveedor.');
-      return;
-    }
-    try {
-      await grantProviderCapacityUseCase.execute(userId);
-      setActionMessage('Capacidad de Proveedor otorgada exitosamente al usuario.');
-      fetchReports();
-    } catch (err: any) {
-      setActionMessage(err instanceof Error ? err.message : 'Error al otorgar capacidad de Proveedor.');
     }
   };
 
@@ -166,7 +153,6 @@ export function useAdminPanel(platformRole: Role) {
     categoryFilter,
     setCategoryFilter,
     canSuspendUser,
-    canGrantProvider,
     canModerateListing,
     canModerateReview,
     canResolveReport,
@@ -177,7 +163,6 @@ export function useAdminPanel(platformRole: Role) {
     handleResolveReport,
     handleModerateListing,
     handleModerateReview,
-    handleGrantProviderCapacity,
     handleSuspendUser,
   };
 }

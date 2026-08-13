@@ -1,8 +1,10 @@
 // src/components/auth/CredentialsInput.tsx
 import React from 'react';
 import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { CustomInput } from '@/components/common/CustomInput';
 import { ThemedText } from '@/components/themed-text';
+import { ErrorText } from '@/components/common/ErrorText';
 import { useTheme } from '@/hooks/use-theme';
 
 interface Props {
@@ -24,22 +26,23 @@ export function CredentialsInput({
   password,
   onChangePassword,
   onSubmit,
-  submitButtonText = 'Iniciar sesión',
+  submitButtonText,
   onPressRegister,
   isLoading = false,
   error,
   errorMessage,
 }: Props) {
   const t = useTheme();
+  const { t: translate } = useTranslation();
   const displayError = error || errorMessage;
 
   return (
     <View style={styles.container}>
       {/* Campo de Correo Electrónico */}
       <CustomInput
-        label="Correo electrónico"
+        label={translate('auth.login.emailLabel')}
         iconName="email-outline"
-        placeholder="tu@correo.com"
+        placeholder={translate('auth.login.emailPlaceholder')}
         value={email}
         onChangeText={onChangeEmail}
         keyboardType="email-address"
@@ -48,7 +51,7 @@ export function CredentialsInput({
 
       {/* Campo de Contraseña */}
       <CustomInput
-        label="Contraseña"
+        label={translate('auth.login.passwordLabel')}
         iconName="lock-outline"
         placeholder="••••••••"
         value={password}
@@ -57,9 +60,7 @@ export function CredentialsInput({
       />
 
       {/* Mensaje de error si ocurre algún fallo */}
-      {displayError ? (
-        <ThemedText style={styles.errorText}>{displayError}</ThemedText>
-      ) : null}
+      {displayError ? <ErrorText>{displayError}</ErrorText> : null}
 
       {/* Botón de Enviar Formulario */}
       <TouchableOpacity
@@ -71,7 +72,9 @@ export function CredentialsInput({
         {isLoading ? (
           <ActivityIndicator color="#FFFFFF" />
         ) : (
-          <ThemedText style={styles.submitButtonText}>{submitButtonText}</ThemedText>
+          <ThemedText style={styles.submitButtonText}>
+            {submitButtonText ?? translate('auth.login.submit')}
+          </ThemedText>
         )}
       </TouchableOpacity>
 
@@ -79,11 +82,11 @@ export function CredentialsInput({
       {onPressRegister && (
         <View style={styles.registerContainer}>
           <ThemedText style={[styles.registerText, { color: t.text }]}>
-            ¿No tienes una cuenta?{' '}
+            {translate('auth.login.noAccount')}
           </ThemedText>
           <TouchableOpacity onPress={onPressRegister} activeOpacity={0.7}>
             <ThemedText style={[styles.registerLink, { color: t.primary }]}>
-              Regístrate
+              {translate('auth.login.registerLink')}
             </ThemedText>
           </TouchableOpacity>
         </View>

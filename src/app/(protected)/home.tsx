@@ -1,9 +1,11 @@
-// src/app/home.tsx
-import React, { useEffect, useState } from 'react';
+// src/app/(protected)/home.tsx
+import React, { useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
+
+import { useTranslation } from 'react-i18next';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -11,43 +13,35 @@ import { useTheme } from '@/hooks/use-theme';
 import { has } from '@/domain/auth/actor';
 import { ParticipantType } from '@/domain/auth/User';
 import { useSession } from '@/presentation/auth/SessionContext';
+import { useRequestProviderCapacity } from '@/presentation/auth/hooks/useRequestProviderCapacity';
 
 export default function HomeScreen() {
   const t = useTheme();
   const router = useRouter();
-  const { status, actor, signOut } = useSession();
+  const { t: translate } = useTranslation();
+  // (protected)/_layout.tsx ya garantiza sesión activa: actor nunca es null aquí.
+  const { actor: rawActor, signOut } = useSession();
+  const actor = rawActor!;
   const [activeRole, setActiveRole] = useState<ParticipantType>('Cliente');
-  // Optimismo local mientras llega la respuesta real de POST /me/capacities/provider (Cerca.md)
-  const [requestSent, setRequestSent] = useState(false);
-
-  useEffect(() => {
-    if (status === 'signedOut') {
-      router.replace('/');
-    }
-  }, [status, router]);
-
-  if (!actor) {
-    return (
-      <SafeAreaView style={[styles.container, styles.centeredContainer, { backgroundColor: t.background }]}>
-        <ActivityIndicator size="large" color={t.primary} />
-      </SafeAreaView>
-    );
-  }
+  const {
+    requestProvider,
+    loading: requestProviderLoading,
+    error: requestProviderError,
+  } = useRequestProviderCapacity();
 
   // Cerca.md: la capacidad manda si se ve el modo Proveedor, no un rol fijo
-  const hasProviderCapacity = has(actor, 'provider') || requestSent;
+  const hasProviderCapacity = has(actor, 'provider');
 
   // Cerca.md: solo moderator y admin ven el acceso al panel de moderación
   const canAccessAdminPanel = actor.platformRole === 'admin' || actor.platformRole === 'moderator';
 
+  // (protected)/_layout.tsx redirige a '/' en cuanto status pasa a 'signedOut'.
   const handleSignOut = async () => {
     await signOut();
-    router.replace('/');
   };
 
   const handleRequestProvider = async () => {
-    // Simula la llamada a POST /me/capacities/provider (Cerca.md)
-    setRequestSent(true);
+    await requestProvider();
   };
 
   return (
@@ -56,9 +50,11 @@ export default function HomeScreen() {
         {/* Header de bienvenida */}
         <View style={styles.header}>
           <View>
-            <ThemedText style={[styles.greeting, { color: t.primary }]}>¡Hola de nuevo!</ThemedText>
+            <ThemedText style={[styles.greeting, { color: t.primary }]}>
+              {translate('home.greeting')}
+            </ThemedText>
             <ThemedText type="title" style={[styles.title, { color: t.text }]}>
-              Bienvenido a Cerca
+              {translate('home.welcome')}
             </ThemedText>
           </View>
 
@@ -70,18 +66,25 @@ export default function HomeScreen() {
         {/* Acceso al Panel de Moderación y Admin — solo visible para roles con permiso */}
         {canAccessAdminPanel && (
           <TouchableOpacity
-            style={[styles.adminAccessCard, { backgroundColor: t.card, borderColor: t.roleAdmin ?? '#F18933' }]}
+            style={[
+              styles.adminAccessCard,
+              { backgroundColor: t.card, borderColor: t.roleAdmin ?? '#F18933' },
+            ]}
             onPress={() => router.push('/admin')}
             activeOpacity={0.8}
           >
             <View style={styles.adminAccessRow}>
-              <MaterialCommunityIcons name="shield-crown-outline" size={24} color={t.roleAdmin ?? '#F18933'} />
+              <MaterialCommunityIcons
+                name="shield-crown-outline"
+                size={24}
+                color={t.roleAdmin ?? '#F18933'}
+              />
               <View style={{ flex: 1 }}>
                 <ThemedText style={[styles.adminAccessTitle, { color: t.text }]}>
-                  Panel de Moderación (Admin)
+                  {translate('home.adminPanelTitle')}
                 </ThemedText>
                 <ThemedText style={[styles.adminAccessSubtitle, { color: t.icon }]}>
-                  Gestionar denuncias, solicitudes y moderar plataforma
+                  {translate('home.adminPanelSubtitle')}
                 </ThemedText>
               </View>
               <MaterialCommunityIcons name="chevron-right" size={22} color={t.icon} />
@@ -91,7 +94,9 @@ export default function HomeScreen() {
 
         {/* Switcher de Vista: Cliente vs Proveedor (si tiene la capacidad habilitada) */}
         {hasProviderCapacity ? (
-          <View style={[styles.switchContainer, { backgroundColor: t.card, borderColor: t.border }]}>
+          <View
+            style={[styles.switchContainer, { backgroundColor: t.card, borderColor: t.border }]}
+          >
             <TouchableOpacity
               style={[
                 styles.switchButton,
@@ -111,7 +116,7 @@ export default function HomeScreen() {
                   { color: activeRole === 'Cliente' ? '#FFFFFF' : t.text },
                 ]}
               >
-                Modo Cliente
+                {translate('home.customerMode')}
               </ThemedText>
             </TouchableOpacity>
 
@@ -134,7 +139,7 @@ export default function HomeScreen() {
                   { color: activeRole === 'Proveedor' ? '#FFFFFF' : t.text },
                 ]}
               >
-                Modo Proveedor
+                {translate('home.providerMode')}
               </ThemedText>
             </TouchableOpacity>
           </View>
@@ -148,85 +153,107 @@ export default function HomeScreen() {
               <View style={styles.roleHeader}>
                 <MaterialCommunityIcons name="account-check" size={24} color={t.primary} />
                 <ThemedText style={[styles.roleTitle, { color: t.text }]}>
-                  Vista como Cliente
+                  {translate('home.customerViewTitle')}
                 </ThemedText>
               </View>
               <ThemedText style={[styles.roleSubtext, { color: t.icon }]}>
-                Explora servicios locales cerca de ti, solicita reservas y contacta profesionales capacitados.
+                {translate('home.customerViewSubtitle')}
               </ThemedText>
             </ThemedView>
 
             {/* Banner para solicitar ser Proveedor si no tiene la capacidad aún */}
             {!hasProviderCapacity && (
-              <ThemedView style={[styles.providerBanner, { backgroundColor: t.card, borderColor: t.border }]}>
+              <ThemedView
+                style={[styles.providerBanner, { backgroundColor: t.card, borderColor: t.border }]}
+              >
                 <View style={styles.providerBannerContent}>
                   <FontAwesome name="wrench" size={22} color={t.primary} />
                   <View style={{ flex: 1 }}>
                     <ThemedText style={[styles.providerBannerTitle, { color: t.text }]}>
-                      ¿Quieres ofrecer tus servicios en Cerca?
+                      {translate('home.becomeProviderTitle')}
                     </ThemedText>
                     <ThemedText style={[styles.providerBannerSub, { color: t.icon }]}>
-                      Activa tu capacidad de Proveedor para publicar anuncios y recibir reservas de clientes.
+                      {translate('home.becomeProviderSubtitle')}
                     </ThemedText>
                   </View>
                 </View>
+
+                {requestProviderError ? (
+                  <ThemedText style={styles.providerBannerError}>{requestProviderError}</ThemedText>
+                ) : null}
 
                 <TouchableOpacity
                   style={[styles.requestBtn, { backgroundColor: t.primary }]}
                   onPress={handleRequestProvider}
                   activeOpacity={0.8}
+                  disabled={requestProviderLoading}
                 >
-                  <MaterialCommunityIcons name="briefcase-plus" size={18} color="#FFFFFF" />
-                  <ThemedText style={styles.requestBtnText}>
-                    Habilitar Modo Proveedor
-                  </ThemedText>
+                  {requestProviderLoading ? (
+                    <ActivityIndicator color="#FFFFFF" size="small" />
+                  ) : (
+                    <>
+                      <MaterialCommunityIcons name="briefcase-plus" size={18} color="#FFFFFF" />
+                      <ThemedText style={styles.requestBtnText}>
+                        {translate('home.enableProviderMode')}
+                      </ThemedText>
+                    </>
+                  )}
                 </TouchableOpacity>
               </ThemedView>
             )}
 
             {/* Accesos rápidos Cliente */}
             <ThemedText style={[styles.sectionHeader, { color: t.text }]}>
-              Servicios en tu zona
+              {translate('home.servicesNearYou')}
             </ThemedText>
 
             <View style={styles.gridContainer}>
-              <TouchableOpacity style={[styles.gridCard, { backgroundColor: t.card }]}>
+              <TouchableOpacity
+                style={[styles.gridCard, { backgroundColor: t.card }]}
+                onPress={() => router.push('/search')}
+              >
                 <MaterialCommunityIcons name="magnify-expand" size={30} color={t.primary} />
                 <ThemedText style={[styles.gridCardTitle, { color: t.text }]}>
-                  Buscar Servicios
+                  {translate('home.searchServices')}
                 </ThemedText>
                 <ThemedText style={[styles.gridCardSubtitle, { color: t.icon }]}>
-                  Explorar proveedores cerca de ti
+                  {translate('home.searchServicesSub')}
                 </ThemedText>
               </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.gridCard, { backgroundColor: t.card }]}>
+              <TouchableOpacity
+                style={[styles.gridCard, { backgroundColor: t.card }]}
+                onPress={() => router.push('/bookings')}
+              >
                 <MaterialCommunityIcons name="calendar-clock" size={30} color={t.primary} />
                 <ThemedText style={[styles.gridCardTitle, { color: t.text }]}>
-                  Mis Reservas
+                  {translate('home.myBookings')}
                 </ThemedText>
                 <ThemedText style={[styles.gridCardSubtitle, { color: t.icon }]}>
-                  Gestiona tus solicitudes
+                  {translate('home.myBookingsSub')}
                 </ThemedText>
               </TouchableOpacity>
 
               <TouchableOpacity style={[styles.gridCard, { backgroundColor: t.card }]}>
                 <FontAwesome name="heart-o" size={26} color={t.primary} />
                 <ThemedText style={[styles.gridCardTitle, { color: t.text }]}>
-                  Favoritos
+                  {translate('home.favorites')}
                 </ThemedText>
                 <ThemedText style={[styles.gridCardSubtitle, { color: t.icon }]}>
-                  Servicios guardados
+                  {translate('home.favoritesSub')}
                 </ThemedText>
               </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.gridCard, { backgroundColor: t.card }]}>
+              <TouchableOpacity
+                style={[styles.gridCard, { backgroundColor: t.card }]}
+                onPress={() => router.push('/settings')}
+              >
                 <MaterialCommunityIcons name="cog-outline" size={30} color={t.primary} />
                 <ThemedText style={[styles.gridCardTitle, { color: t.text }]}>
-                  Configuración
+                  {translate('home.settings')}
                 </ThemedText>
                 <ThemedText style={[styles.gridCardSubtitle, { color: t.icon }]}>
-                  Ajustes de cuenta
+                  {translate('home.settingsSub')}
                 </ThemedText>
               </TouchableOpacity>
             </View>
@@ -238,57 +265,87 @@ export default function HomeScreen() {
               <View style={styles.roleHeader}>
                 <FontAwesome name="wrench" size={20} color={t.primary} />
                 <ThemedText style={[styles.roleTitle, { color: t.text }]}>
-                  Vista como Proveedor (Habilitado)
+                  {translate('home.providerViewTitle')}
                 </ThemedText>
               </View>
               <ThemedText style={[styles.roleSubtext, { color: t.icon }]}>
-                Publica tus servicios, gestiona reservas recibidas y aumenta tu red de clientes en Cerca.
+                {translate('home.providerViewSubtitle')}
               </ThemedText>
             </ThemedView>
 
             {/* Accesos rápidos Proveedor */}
             <ThemedText style={[styles.sectionHeader, { color: t.text }]}>
-              Panel de Proveedor
+              {translate('home.providerPanel')}
             </ThemedText>
 
             <View style={styles.gridContainer}>
-              <TouchableOpacity style={[styles.gridCard, { backgroundColor: t.card }]}>
+              <TouchableOpacity
+                style={[styles.gridCard, { backgroundColor: t.card }]}
+                onPress={() => router.push('/provider/listings/new')}
+              >
                 <MaterialCommunityIcons name="plus-box" size={30} color={t.primary} />
                 <ThemedText style={[styles.gridCardTitle, { color: t.text }]}>
-                  Publicar Servicio
+                  {translate('home.publishService')}
                 </ThemedText>
                 <ThemedText style={[styles.gridCardSubtitle, { color: t.icon }]}>
-                  Crear un nuevo anuncio
+                  {translate('home.publishServiceSub')}
                 </ThemedText>
               </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.gridCard, { backgroundColor: t.card }]}>
+              <TouchableOpacity
+                style={[styles.gridCard, { backgroundColor: t.card }]}
+                onPress={() => router.push('/provider/listings')}
+              >
                 <MaterialCommunityIcons name="store-outline" size={30} color={t.primary} />
                 <ThemedText style={[styles.gridCardTitle, { color: t.text }]}>
-                  Mis Anuncios
+                  {translate('home.myListings')}
                 </ThemedText>
                 <ThemedText style={[styles.gridCardSubtitle, { color: t.icon }]}>
-                  Servicios activos y pausados
+                  {translate('home.myListingsSub')}
+                </ThemedText>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.gridCard, { backgroundColor: t.card }]}
+                onPress={() => router.push('/provider/bookings')}
+              >
+                <MaterialCommunityIcons
+                  name="clipboard-check-outline"
+                  size={30}
+                  color={t.primary}
+                />
+                <ThemedText style={[styles.gridCardTitle, { color: t.text }]}>
+                  {translate('home.requests')}
+                </ThemedText>
+                <ThemedText style={[styles.gridCardSubtitle, { color: t.icon }]}>
+                  {translate('home.requestsSub')}
                 </ThemedText>
               </TouchableOpacity>
 
               <TouchableOpacity style={[styles.gridCard, { backgroundColor: t.card }]}>
-                <MaterialCommunityIcons name="clipboard-check-outline" size={30} color={t.primary} />
+                <MaterialCommunityIcons
+                  name="badge-account-horizontal-outline"
+                  size={30}
+                  color={t.primary}
+                />
                 <ThemedText style={[styles.gridCardTitle, { color: t.text }]}>
-                  Solicitudes
+                  {translate('home.providerProfile')}
                 </ThemedText>
                 <ThemedText style={[styles.gridCardSubtitle, { color: t.icon }]}>
-                  Aceptar o rechazar clientes
+                  {translate('home.providerProfileSub')}
                 </ThemedText>
               </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.gridCard, { backgroundColor: t.card }]}>
-                <MaterialCommunityIcons name="badge-account-horizontal-outline" size={30} color={t.primary} />
+              <TouchableOpacity
+                style={[styles.gridCard, { backgroundColor: t.card }]}
+                onPress={() => router.push('/settings')}
+              >
+                <MaterialCommunityIcons name="cog-outline" size={30} color={t.primary} />
                 <ThemedText style={[styles.gridCardTitle, { color: t.text }]}>
-                  Perfil Proveedor
+                  {translate('home.settings')}
                 </ThemedText>
                 <ThemedText style={[styles.gridCardSubtitle, { color: t.icon }]}>
-                  Capacidades y catálogo
+                  {translate('home.settingsSub')}
                 </ThemedText>
               </TouchableOpacity>
             </View>
@@ -302,7 +359,7 @@ export default function HomeScreen() {
           activeOpacity={0.7}
         >
           <MaterialCommunityIcons name="logout" size={20} color="#FF3B30" />
-          <ThemedText style={styles.logoutText}>Cerrar sesión</ThemedText>
+          <ThemedText style={styles.logoutText}>{translate('home.signOut')}</ThemedText>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -312,10 +369,6 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  centeredContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   scrollContent: {
     padding: 20,
@@ -411,6 +464,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 4,
     lineHeight: 18,
+  },
+  providerBannerError: {
+    color: '#D32F2F',
+    fontSize: 13,
   },
   requestBtn: {
     flexDirection: 'row',

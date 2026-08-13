@@ -14,7 +14,10 @@ export function isValidEmail(email: string): boolean {
  * - Al menos un número
  * - Al menos una letra mayúscula
  */
-export function validatePasswordRequirements(password: string): { isValid: boolean; message?: string } {
+export function validatePasswordRequirements(password: string): {
+  isValid: boolean;
+  message?: string;
+} {
   if (password.length < 8) {
     return { isValid: false, message: 'La contraseña debe tener al menos 8 caracteres.' };
   }

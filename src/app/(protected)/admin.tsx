@@ -1,4 +1,4 @@
-// src/app/admin.tsx
+// src/app/(protected)/admin.tsx
 import React from 'react';
 import {
   ActivityIndicator,
@@ -11,11 +11,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { ReportCard } from '@/components/admin/ReportCard';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { TOUCH_HIT_SLOP } from '@/constants/accessibility';
 import { ReportTargetType } from '@/domain/admin/Report';
 import { Role } from '@/domain/auth/User';
 import { useTheme } from '@/hooks/use-theme';
@@ -25,9 +27,11 @@ import { useSession } from '@/presentation/auth/SessionContext';
 export default function AdminScreen() {
   const t = useTheme();
   const router = useRouter();
-  const { status, actor } = useSession();
+  const { t: translate } = useTranslation();
+  const { actor } = useSession();
   // Cerca.md: platformRole es la autoridad de UI; el servidor sigue siendo la autoridad real.
-  const platformRole = (actor?.platformRole.toUpperCase() as Role) ?? 'USER';
+  // (protected)/_layout.tsx ya garantiza sesión activa: actor nunca es null aquí.
+  const platformRole = actor!.platformRole.toUpperCase() as Role;
   const {
     reports,
     pendingCount,
@@ -37,7 +41,6 @@ export default function AdminScreen() {
     categoryFilter,
     setCategoryFilter,
     canSuspendUser,
-    canGrantProvider,
     canModerateListing,
     canModerateReview,
     canResolveReport,
@@ -48,24 +51,15 @@ export default function AdminScreen() {
     handleResolveReport,
     handleModerateListing,
     handleModerateReview,
-    handleGrantProviderCapacity,
     handleSuspendUser,
   } = useAdminPanel(platformRole);
 
-  const CATEGORY_CHIPS: { label: string; value: 'all' | ReportTargetType }[] = [
-    { label: 'Todos', value: 'all' },
-    { label: 'Anuncios', value: 'listing' },
-    { label: 'Reseñas', value: 'review' },
-    { label: 'Usuarios', value: 'user' },
+  const CATEGORY_CHIPS: { labelKey: string; value: 'all' | ReportTargetType }[] = [
+    { labelKey: 'admin.categoryAll', value: 'all' },
+    { labelKey: 'admin.categoryListings', value: 'listing' },
+    { labelKey: 'admin.categoryReviews', value: 'review' },
+    { labelKey: 'admin.categoryUsers', value: 'user' },
   ];
-
-  if (status === 'loading') {
-    return (
-      <SafeAreaView style={[styles.container, styles.fullscreenCentered, { backgroundColor: t.background }]}>
-        <ActivityIndicator size="large" color={t.primary} />
-      </SafeAreaView>
-    );
-  }
 
   // Guarda de Protección de Ruta de Cerca.md: si el usuario es 'USER' normal, bloquea la vista
   if (platformRole === 'USER') {
@@ -76,18 +70,23 @@ export default function AdminScreen() {
             style={styles.backButton}
             onPress={() => router.replace('/home')}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={translate('admin.backToHome')}
+            hitSlop={TOUCH_HIT_SLOP}
           >
             <MaterialCommunityIcons name="arrow-left" size={24} color={t.text} />
-            <ThemedText style={{ color: t.text, fontSize: 16 }}>Volver al inicio</ThemedText>
+            <ThemedText style={{ color: t.text, fontSize: 16 }}>
+              {translate('admin.backToHome')}
+            </ThemedText>
           </TouchableOpacity>
 
           <ThemedView style={[styles.emptyCard, { backgroundColor: t.card }]}>
             <MaterialCommunityIcons name="shield-lock-outline" size={54} color="#FF3B30" />
             <ThemedText style={[styles.emptyTitle, { color: t.text }]}>
-              Acceso Restringido
+              {translate('admin.restrictedTitle')}
             </ThemedText>
             <ThemedText style={[styles.emptySubtext, { color: t.icon }]}>
-              No tienes permisos de Moderador ni Administrador para visualizar este panel.
+              {translate('admin.restrictedSubtitle')}
             </ThemedText>
           </ThemedView>
         </ScrollView>
@@ -102,10 +101,7 @@ export default function AdminScreen() {
         refreshControl={<RefreshControl refreshing={loading} onRefresh={refreshReports} />}
       >
         {/* Header con Badge de Admin/Moderador */}
-        <AdminHeader
-          onBackPress={() => router.back()}
-          platformRole={platformRole}
-        />
+        <AdminHeader onBackPress={() => router.back()} platformRole={platformRole} />
 
         {/* Banner de notificación de acción */}
         {actionMessage ? (
@@ -120,38 +116,26 @@ export default function AdminScreen() {
         {/* Pestañas Principales: Pendientes vs Resueltos */}
         <View style={[styles.tabContainer, { backgroundColor: t.card, borderColor: t.border }]}>
           <TouchableOpacity
-            style={[
-              styles.tabBtn,
-              activeTab === 'pending' && { backgroundColor: t.primary },
-            ]}
+            style={[styles.tabBtn, activeTab === 'pending' && { backgroundColor: t.primary }]}
             onPress={() => setActiveTab('pending')}
             activeOpacity={0.8}
           >
             <ThemedText
-              style={[
-                styles.tabText,
-                { color: activeTab === 'pending' ? '#FFFFFF' : t.text },
-              ]}
+              style={[styles.tabText, { color: activeTab === 'pending' ? '#FFFFFF' : t.text }]}
             >
-              Pendientes ({pendingCount})
+              {translate('admin.pending', { count: pendingCount })}
             </ThemedText>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[
-              styles.tabBtn,
-              activeTab === 'resolved' && { backgroundColor: t.primary },
-            ]}
+            style={[styles.tabBtn, activeTab === 'resolved' && { backgroundColor: t.primary }]}
             onPress={() => setActiveTab('resolved')}
             activeOpacity={0.8}
           >
             <ThemedText
-              style={[
-                styles.tabText,
-                { color: activeTab === 'resolved' ? '#FFFFFF' : t.text },
-              ]}
+              style={[styles.tabText, { color: activeTab === 'resolved' ? '#FFFFFF' : t.text }]}
             >
-              Resueltos ({resolvedCount})
+              {translate('admin.resolved', { count: resolvedCount })}
             </ThemedText>
           </TouchableOpacity>
         </View>
@@ -177,7 +161,7 @@ export default function AdminScreen() {
                   { color: categoryFilter === chip.value ? '#FFFFFF' : t.text },
                 ]}
               >
-                {chip.label}
+                {translate(chip.labelKey)}
               </ThemedText>
             </TouchableOpacity>
           ))}
@@ -188,18 +172,27 @@ export default function AdminScreen() {
           <View style={styles.centered}>
             <ActivityIndicator size="large" color={t.primary} />
             <ThemedText style={[styles.loadingText, { color: t.icon }]}>
-              Cargando cola de moderación...
+              {translate('admin.loadingQueue')}
             </ThemedText>
           </View>
         ) : reports.length === 0 ? (
           <ThemedView style={[styles.emptyCard, { backgroundColor: t.card }]}>
             <MaterialCommunityIcons name="shield-check-outline" size={48} color={t.primary} />
             <ThemedText style={[styles.emptyTitle, { color: t.text }]}>
-              Cola de moderación al día
+              {translate('admin.queueUpToDate')}
             </ThemedText>
             <ThemedText style={[styles.emptySubtext, { color: t.icon }]}>
-              No hay denuncias {activeTab === 'pending' ? 'pendientes' : 'resueltas'}{' '}
-              {categoryFilter !== 'all' ? `para el filtro "${categoryFilter}"` : ''}.
+              {translate('admin.noReportsBase', {
+                status: translate(
+                  activeTab === 'pending'
+                    ? 'admin.statusPendingPlural'
+                    : 'admin.statusResolvedPlural',
+                ),
+                filter:
+                  categoryFilter !== 'all'
+                    ? translate('admin.filterForSuffix', { filter: categoryFilter })
+                    : '',
+              })}
             </ThemedText>
           </ThemedView>
         ) : (
@@ -209,14 +202,12 @@ export default function AdminScreen() {
                 key={item.id}
                 report={item}
                 canSuspendUser={canSuspendUser}
-                canGrantProvider={canGrantProvider}
                 canModerateListing={canModerateListing}
                 canModerateReview={canModerateReview}
                 canResolveReport={canResolveReport}
                 onResolve={handleResolveReport}
                 onModerateListing={handleModerateListing}
                 onModerateReview={handleModerateReview}
-                onGrantProvider={handleGrantProviderCapacity}
                 onSuspendUser={handleSuspendUser}
               />
             ))}
@@ -230,10 +221,6 @@ export default function AdminScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  fullscreenCentered: {
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   scrollContent: {
     padding: 20,

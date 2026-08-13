@@ -1,18 +1,20 @@
 import { ThemedText } from '@/components/themed-text';
 import { useTheme } from '@/hooks/use-theme';
 import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 export function LoginHeader() {
   const t = useTheme();
+  const { t: translate } = useTranslation();
 
   return (
     <View style={styles.header}>
       <ThemedText style={[styles.logo, { color: t.primary }]}>LOGO</ThemedText>
       <ThemedText type="title" style={[styles.brandText, { color: t.text }]}>
-        Cerca
+        {translate('auth.login.brand')}
       </ThemedText>
       <ThemedText style={[styles.subtitleText, { color: t.primary }]}>
-        Marketplace de servicios locales
+        {translate('auth.login.tagline')}
       </ThemedText>
     </View>
   );

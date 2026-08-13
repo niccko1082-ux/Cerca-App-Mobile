@@ -26,9 +26,4 @@ export interface AdminRepository {
    * Suspende la cuenta de un usuario (Permiso exclusivo de Admin: user:suspend).
    */
   suspendUser(data: SuspendUserData): Promise<void>;
-
-  /**
-   * Otorga la capacidad de Proveedor a un usuario (POST /v1/users/{id}/capacities/provider).
-   */
-  grantProviderCapacity(userId: string): Promise<void>;
 }

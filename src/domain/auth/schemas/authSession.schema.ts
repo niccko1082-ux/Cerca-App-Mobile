@@ -6,24 +6,28 @@ import { z } from 'zod';
 const capacitySchema = z.enum(['customer', 'provider']);
 const platformRoleSchema = z.enum(['user', 'moderator', 'admin']);
 
-export const userSchema = z.object({
+export const userSchema = z
+  .object({
     id: z.union([z.string(), z.number()]).transform((val) => String(val)),
     email: z.string().optional().default(''),
     name: z.string().optional(),
     displayName: z.string().optional(),
     capacities: z.array(capacitySchema).optional().default([]).catch([]),
     platformRole: platformRoleSchema.optional().default('user').catch('user'),
-}).passthrough();
+  })
+  .passthrough();
 
-export const authSessionSchema = z.object({
+export const authSessionSchema = z
+  .object({
     accessToken: z.string(),
     refreshToken: z.string().optional().default(''),
     user: userSchema.optional(),
     actor: userSchema.optional(),
-}).transform((data) => ({
+  })
+  .transform((data) => ({
     accessToken: data.accessToken,
     refreshToken: data.refreshToken,
     user: data.user || data.actor || { id: '1', email: '', name: '' },
-}));
+  }));
 
 export type AuthSessionDTO = z.infer<typeof authSessionSchema>;

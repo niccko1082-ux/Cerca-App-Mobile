@@ -12,7 +12,7 @@ const palette = {
   neutralText: '#4D4039',
   neutralIcon: '#737773',
   darkBackground: '#212121', // Fondo Modo Oscuro
-  darkCard: '#313131',      // Tarjeta Modo Oscuro
+  darkCard: '#313131', // Tarjeta Modo Oscuro
   darkText: '#E0E0E0',
   darkIcon: '#9E9E9E',
 };

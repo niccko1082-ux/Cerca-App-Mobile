@@ -1,0 +1,11 @@
+node_modules/
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+android/
+ios/
+package-lock.json
+*.md
+assets/
+scripts/reset-project.js

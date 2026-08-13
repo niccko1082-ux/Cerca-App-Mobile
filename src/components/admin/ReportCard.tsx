@@ -2,6 +2,7 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useTheme } from '@/hooks/use-theme';
@@ -10,31 +11,28 @@ import { ListingModerationStatus, Report, ReviewModerationStatus } from '@/domai
 interface Props {
   report: Report;
   canSuspendUser?: boolean;
-  canGrantProvider?: boolean;
   canModerateListing?: boolean;
   canModerateReview?: boolean;
   canResolveReport?: boolean;
   onResolve: (id: string) => void;
   onModerateListing: (listingId: string, status: ListingModerationStatus) => void;
   onModerateReview: (reviewId: string, status: ReviewModerationStatus, authorId?: string) => void;
-  onGrantProvider?: (userId: string) => void;
   onSuspendUser: (userId: string) => void;
 }
 
 export function ReportCard({
   report,
   canSuspendUser = false,
-  canGrantProvider = false,
   canModerateListing = false,
   canModerateReview = false,
   canResolveReport = false,
   onResolve,
   onModerateListing,
   onModerateReview,
-  onGrantProvider,
   onSuspendUser,
 }: Props) {
   const t = useTheme();
+  const { t: translate } = useTranslation();
 
   const getTargetIcon = () => {
     switch (report.targetType) {
@@ -52,13 +50,13 @@ export function ReportCard({
   const getTargetLabel = () => {
     switch (report.targetType) {
       case 'listing':
-        return 'Anuncio Reportado';
+        return translate('admin.targetListing');
       case 'review':
-        return 'Reseña Denunciada';
+        return translate('admin.targetReview');
       case 'user':
-        return 'Usuario / Solicitud Proveedor';
+        return translate('admin.targetUser');
       default:
-        return 'Reporte';
+        return translate('admin.targetDefault');
     }
   };
 
@@ -77,10 +75,7 @@ export function ReportCard({
           style={[
             styles.statusBadge,
             {
-              backgroundColor:
-                report.status === 'pending'
-                  ? '#FF950020'
-                  : '#34C75920',
+              backgroundColor: report.status === 'pending' ? '#FF950020' : '#34C75920',
             },
           ]}
         >
@@ -90,7 +85,9 @@ export function ReportCard({
               { color: report.status === 'pending' ? '#FF9500' : '#34C759' },
             ]}
           >
-            {report.status === 'pending' ? 'Pendiente' : 'Resuelto'}
+            {report.status === 'pending'
+              ? translate('admin.statusPending')
+              : translate('admin.statusResolved')}
           </ThemedText>
         </View>
       </View>
@@ -99,7 +96,7 @@ export function ReportCard({
       <ThemedText style={[styles.title, { color: t.text }]}>{report.targetTitle}</ThemedText>
       <View style={[styles.reasonBox, { backgroundColor: t.background }]}>
         <ThemedText style={[styles.reasonText, { color: t.text }]}>
-          "{report.reason}"
+          &ldquo;{report.reason}&rdquo;
         </ThemedText>
       </View>
 
@@ -107,7 +104,7 @@ export function ReportCard({
       <View style={styles.metaRow}>
         <MaterialCommunityIcons name="account-outline" size={14} color={t.icon} />
         <ThemedText style={[styles.metaText, { color: t.icon }]}>
-          Usuario: {report.reporterName || report.reporterId}
+          {translate('admin.reportedBy', { name: report.reporterName || report.reporterId })}
         </ThemedText>
       </View>
 
@@ -122,7 +119,7 @@ export function ReportCard({
               activeOpacity={0.8}
             >
               <MaterialCommunityIcons name="eye-off-outline" size={14} color="#FFFFFF" />
-              <ThemedText style={styles.btnText}>En Revisión</ThemedText>
+              <ThemedText style={styles.btnText}>{translate('admin.underReview')}</ThemedText>
             </TouchableOpacity>
           )}
 
@@ -134,19 +131,7 @@ export function ReportCard({
               activeOpacity={0.8}
             >
               <MaterialCommunityIcons name="comment-off-outline" size={14} color="#FFFFFF" />
-              <ThemedText style={styles.btnText}>Ocultar Reseña</ThemedText>
-            </TouchableOpacity>
-          )}
-
-          {/* grantProviderCapacity → solo ADMIN */}
-          {report.targetType === 'user' && canGrantProvider && (
-            <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: '#34C759' }]}
-              onPress={() => onGrantProvider?.(report.targetId)}
-              activeOpacity={0.8}
-            >
-              <MaterialCommunityIcons name="account-check-outline" size={14} color="#FFFFFF" />
-              <ThemedText style={styles.btnText}>Habilitar Proveedor</ThemedText>
+              <ThemedText style={styles.btnText}>{translate('admin.hideReview')}</ThemedText>
             </TouchableOpacity>
           )}
 
@@ -158,7 +143,7 @@ export function ReportCard({
               activeOpacity={0.8}
             >
               <MaterialCommunityIcons name="account-remove-outline" size={14} color="#FFFFFF" />
-              <ThemedText style={styles.btnText}>Suspender</ThemedText>
+              <ThemedText style={styles.btnText}>{translate('admin.suspend')}</ThemedText>
             </TouchableOpacity>
           )}
 
@@ -170,7 +155,7 @@ export function ReportCard({
               activeOpacity={0.8}
             >
               <MaterialCommunityIcons name="check" size={14} color="#FFFFFF" />
-              <ThemedText style={styles.btnText}>Resolver</ThemedText>
+              <ThemedText style={styles.btnText}>{translate('admin.resolve')}</ThemedText>
             </TouchableOpacity>
           )}
         </View>
@@ -245,7 +230,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingVertical: 13,
     borderRadius: 8,
   },
   btnText: {
