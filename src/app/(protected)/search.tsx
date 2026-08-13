@@ -314,11 +314,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   chipsRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     paddingHorizontal: 20,
     paddingVertical: 12,
     gap: 8,
   },
   chip: {
+    alignSelf: 'flex-start',
     borderWidth: 1,
     borderRadius: 20,
     paddingHorizontal: 14,

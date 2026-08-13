@@ -2,6 +2,7 @@
 import { useRouter } from 'expo-router';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 import { CredentialsInput } from '@/components/auth/CredentialsInput';
@@ -72,9 +73,12 @@ export default function HomeScreen() {
               {biometricLoading ? (
                 <ActivityIndicator color={t.primary} />
               ) : (
-                <ThemedText style={{ color: t.primary, fontWeight: '600' }}>
-                  {translate('auth.login.biometric')}
-                </ThemedText>
+                <>
+                  <MaterialCommunityIcons name="fingerprint" size={26} color={t.primary} />
+                  <ThemedText style={{ color: t.primary, fontWeight: '600' }}>
+                    {translate('auth.login.biometric')}
+                  </ThemedText>
+                </>
               )}
             </Pressable>
           )}
@@ -104,8 +108,11 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   biometricButton: {
+    flexDirection: 'row',
     marginTop: 16,
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
     paddingVertical: 10,
   },
   errorText: {
