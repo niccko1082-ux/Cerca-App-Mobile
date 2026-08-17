@@ -73,6 +73,7 @@
     "locationDeniedTitle": "We couldn't access your location",
     "locationDeniedSubtitle": "Pick your city to see services near you.",
     "all": "All",
+    "selectCategory": "Select category",
     "loadError": "We couldn't load the services",
     "emptyFilterTitle": "No services match these filters",
     "clearFilters": "Clear filters",
@@ -88,13 +89,16 @@
     "ratingSummary_one": "{{rating}} · {{count}} review",
     "ratingSummary_other": "{{rating}} · {{count}} reviews",
     "noReviewsYet": "No reviews yet",
+    "nearYou": "Near you",
     "description": "Description",
     "reviews": "Reviews",
     "noReviewsForListing": "There are no reviews for this listing yet.",
     "requestBooking": "Request booking",
     "bookingConfirmed": "Booking requested. Wait for the provider to confirm it.",
     "loadError": "We couldn't load this listing",
-    "detailTitleFallback": "Listing detail"
+    "detailTitleFallback": "Listing detail",
+    "addFavorite": "Add to favorites",
+    "removeFavorite": "Remove from favorites"
   },
   "booking": {
     "title": "My bookings",

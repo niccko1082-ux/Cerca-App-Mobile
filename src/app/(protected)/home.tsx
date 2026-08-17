@@ -237,7 +237,10 @@ export default function HomeScreen() {
                 </ThemedText>
               </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.gridCard, { backgroundColor: t.card }]}>
+              <TouchableOpacity
+                style={[styles.gridCard, { backgroundColor: t.card }]}
+                onPress={() => router.push('/favorites')}
+              >
                 <FontAwesome name="heart-o" size={26} color={t.primary} />
                 <ThemedText style={[styles.gridCardTitle, { color: t.text }]}>
                   {translate('home.favorites')}

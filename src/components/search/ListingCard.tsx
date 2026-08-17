@@ -10,11 +10,18 @@ import { ThemedView } from '@/components/themed-view';
 import { ListingSummary } from '@/domain/listing/Listing';
 import { useTheme } from '@/hooks/use-theme';
 import { formatDistance, formatPriceFrom } from '@/utils/money';
+import {
+  useFavoritesQuery,
+  useToggleFavoriteMutation,
+} from '@/presentation/listing/hooks/useFavorites';
 
 interface Props {
   listing: ListingSummary;
   onPress: (listing: ListingSummary) => void;
 }
+
+// Umbral para el badge "Cerca de ti" — a esta distancia caminar es razonable.
+const NEAR_YOU_THRESHOLD_METERS = 1000;
 
 const STATUS_KEY: Partial<Record<ListingSummary['status'], string>> = {
   paused: 'listing.statusPaused',
@@ -29,6 +36,17 @@ function ListingCardComponent({ listing, onPress }: Props) {
   const t = useTheme();
   const { t: translate } = useTranslation();
   const statusKey = STATUS_KEY[listing.status];
+  const isNearby =
+    listing.distanceMeters !== undefined && listing.distanceMeters <= NEAR_YOU_THRESHOLD_METERS;
+
+  const { data: favorites } = useFavoritesQuery();
+  const toggleFavorite = useToggleFavoriteMutation();
+  const isFavorite = favorites?.includes(listing.id) ?? false;
+
+  const handleFavoritePress = (e: any) => {
+    e.stopPropagation();
+    toggleFavorite.mutate(listing.id);
+  };
 
   return (
     <TouchableOpacity
@@ -37,7 +55,9 @@ function ListingCardComponent({ listing, onPress }: Props) {
       activeOpacity={0.8}
       accessible
       accessibilityRole="button"
-      accessibilityLabel={`${listing.title}, ${formatPriceFrom(listing.priceFrom)}`}
+      accessibilityLabel={`${listing.title}, ${formatPriceFrom(listing.priceFrom)}${
+        isNearby ? `, ${translate('listing.nearYou')}` : ''
+      }`}
     >
       <View style={styles.iconBadge}>
         <MaterialCommunityIcons name="storefront-outline" size={26} color={t.primary} />
@@ -48,6 +68,12 @@ function ListingCardComponent({ listing, onPress }: Props) {
           <ThemedText style={[styles.title, { color: t.text }]} numberOfLines={1}>
             {listing.title}
           </ThemedText>
+          {isNearby ? (
+            <View style={[styles.nearBadge, { backgroundColor: t.primary }]}>
+              <MaterialCommunityIcons name="map-marker" size={11} color="#FFFFFF" />
+              <ThemedText style={styles.nearBadgeText}>{translate('listing.nearYou')}</ThemedText>
+            </View>
+          ) : null}
           {statusKey ? (
             <ThemedView style={[styles.statusBadge, { backgroundColor: t.backgroundSelected }]}>
               <ThemedText style={[styles.statusText, { color: t.textSecondary }]}>
@@ -55,6 +81,21 @@ function ListingCardComponent({ listing, onPress }: Props) {
               </ThemedText>
             </ThemedView>
           ) : null}
+          <TouchableOpacity
+            style={styles.favoriteButton}
+            onPress={handleFavoritePress}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={translate(
+              isFavorite ? 'listing.removeFavorite' : 'listing.addFavorite',
+            )}
+          >
+            <MaterialCommunityIcons
+              name={isFavorite ? 'heart' : 'heart-outline'}
+              size={22}
+              color={isFavorite ? '#FF3B30' : t.icon}
+            />
+          </TouchableOpacity>
         </View>
 
         <ThemedText style={[styles.price, { color: t.primary }]}>
@@ -122,10 +163,26 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
   },
+  favoriteButton: {
+    padding: 4,
+  },
   statusBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 6,
+  },
+  nearBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  nearBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '700',
   },
   statusText: {
     fontSize: 11,

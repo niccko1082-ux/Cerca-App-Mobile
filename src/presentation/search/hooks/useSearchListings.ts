@@ -23,7 +23,13 @@ export function useSearchListings(filters: QueryFilters, coords: Coords | null) 
 
   return useInfiniteQuery({
     queryKey: listingKeys.search(effectiveFilters),
-    queryFn: ({ pageParam }) => searchListingsUseCase.execute(effectiveFilters, pageParam),
+    queryFn: async ({ pageParam }) => {
+      if (pageParam !== undefined) {
+        // Retraso artificial de 1 segundo para mostrar indicador de carga en paginación
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+      return searchListingsUseCase.execute(effectiveFilters, pageParam);
+    },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled: coords !== null,

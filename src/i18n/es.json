@@ -73,6 +73,7 @@
     "locationDeniedTitle": "No pudimos acceder a tu ubicación",
     "locationDeniedSubtitle": "Elige tu ciudad para ver servicios cerca de ti.",
     "all": "Todos",
+    "selectCategory": "Seleccionar categoría",
     "loadError": "No pudimos cargar los servicios",
     "emptyFilterTitle": "Ningún servicio coincide con estos filtros",
     "clearFilters": "Limpiar filtros",
@@ -88,13 +89,16 @@
     "ratingSummary_one": "{{rating}} · {{count}} reseña",
     "ratingSummary_other": "{{rating}} · {{count}} reseñas",
     "noReviewsYet": "Sin reseñas todavía",
+    "nearYou": "Cerca de ti",
     "description": "Descripción",
     "reviews": "Reseñas",
     "noReviewsForListing": "Todavía no hay reseñas para este anuncio.",
     "requestBooking": "Solicitar reserva",
     "bookingConfirmed": "Reserva solicitada. Espera a que el proveedor la confirme.",
     "loadError": "No pudimos cargar este anuncio",
-    "detailTitleFallback": "Detalle del anuncio"
+    "detailTitleFallback": "Detalle del anuncio",
+    "addFavorite": "Agregar a favoritos",
+    "removeFavorite": "Quitar de favoritos"
   },
   "booking": {
     "title": "Mis reservas",

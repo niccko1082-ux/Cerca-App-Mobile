@@ -63,6 +63,7 @@ export class ApiListingAdapter implements ListingRepository {
     if (filters.lng !== undefined) params.set('lng', String(filters.lng));
     if (filters.radiusKm !== undefined) params.set('radiusKm', String(filters.radiusKm));
     if (cursor) params.set('cursor', cursor);
+    params.set('limit', '10');
 
     const response = await fetch(`${this.baseUrl}/v1/listings?${params.toString()}`);
     if (!response.ok) {
