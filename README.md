@@ -1,10 +1,10 @@
-# Cerca - App Mobile 📱
+# Cerca - App Mobile
 
 **Cerca** es una aplicación móvil desarrollada en React Native y Expo que funciona como un Marketplace de Servicios Locales de dos caras, permitiendo conectar a clientes locales con proveedores de servicios de confianza (carpintería, aire acondicionado, etc.).
 
 ---
 
-## 📥 Descarga de la APK (Android)
+## Descarga de la APK (Android)
 
 Puedes descargar la versión de previsualización (APK) directamente en tu dispositivo Android a través del siguiente enlace público sin inconvenientes:
 
@@ -13,7 +13,7 @@ Puedes descargar la versión de previsualización (APK) directamente en tu dispo
 
 ---
 
-## 🛠️ Requisitos Previos
+## Requisitos Previos
 
 Antes de ejecutar el proyecto, asegúrate de tener instalado y configurado lo siguiente:
 
@@ -26,7 +26,7 @@ Antes de ejecutar el proyecto, asegúrate de tener instalado y configurado lo si
 
 ---
 
-## 🚀 Pasos para Levantar el Proyecto
+## Pasos para Levantar el Proyecto
 
 Sigue estos sencillos pasos para iniciar el entorno de desarrollo:
 
@@ -58,7 +58,7 @@ npx expo start
 
 ---
 
-## ⚙️ Comandos del Proyecto
+## Comandos del Proyecto
 
 El proyecto incluye scripts configurados para mantener la calidad y verificar el correcto funcionamiento del código:
 
@@ -70,7 +70,7 @@ El proyecto incluye scripts configurados para mantener la calidad y verificar el
 
 ---
 
-## 👥 Integrantes del Proyecto
+## Integrantes del Proyecto
 
 Este proyecto fue desarrollado y configurado por:
 
