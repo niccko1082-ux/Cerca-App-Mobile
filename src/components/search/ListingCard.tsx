@@ -10,6 +10,10 @@ import { ThemedView } from '@/components/themed-view';
 import { ListingSummary } from '@/domain/listing/Listing';
 import { useTheme } from '@/hooks/use-theme';
 import { formatDistance, formatPriceFrom } from '@/utils/money';
+import {
+  useFavoritesQuery,
+  useToggleFavoriteMutation,
+} from '@/presentation/listing/hooks/useFavorites';
 
 interface Props {
   listing: ListingSummary;
@@ -34,6 +38,15 @@ function ListingCardComponent({ listing, onPress }: Props) {
   const statusKey = STATUS_KEY[listing.status];
   const isNearby =
     listing.distanceMeters !== undefined && listing.distanceMeters <= NEAR_YOU_THRESHOLD_METERS;
+
+  const { data: favorites } = useFavoritesQuery();
+  const toggleFavorite = useToggleFavoriteMutation();
+  const isFavorite = favorites?.includes(listing.id) ?? false;
+
+  const handleFavoritePress = (e: any) => {
+    e.stopPropagation();
+    toggleFavorite.mutate(listing.id);
+  };
 
   return (
     <TouchableOpacity
@@ -68,6 +81,21 @@ function ListingCardComponent({ listing, onPress }: Props) {
               </ThemedText>
             </ThemedView>
           ) : null}
+          <TouchableOpacity
+            style={styles.favoriteButton}
+            onPress={handleFavoritePress}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={translate(
+              isFavorite ? 'listing.removeFavorite' : 'listing.addFavorite',
+            )}
+          >
+            <MaterialCommunityIcons
+              name={isFavorite ? 'heart' : 'heart-outline'}
+              size={22}
+              color={isFavorite ? '#FF3B30' : t.icon}
+            />
+          </TouchableOpacity>
         </View>
 
         <ThemedText style={[styles.price, { color: t.primary }]}>
@@ -134,6 +162,9 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontWeight: '600',
+  },
+  favoriteButton: {
+    padding: 4,
   },
   statusBadge: {
     paddingHorizontal: 8,

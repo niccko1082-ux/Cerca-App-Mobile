@@ -58,7 +58,9 @@ export default function AdminScreen() {
     { labelKey: 'admin.categoryAll', value: 'all' },
     { labelKey: 'admin.categoryListings', value: 'listing' },
     { labelKey: 'admin.categoryReviews', value: 'review' },
-    { labelKey: 'admin.categoryUsers', value: 'user' },
+    ...(platformRole === 'ADMIN'
+      ? [{ labelKey: 'admin.categoryUsers', value: 'user' as const }]
+      : []),
   ];
 
   // Guarda de Protección de Ruta de Cerca.md: si el usuario es 'USER' normal, bloquea la vista

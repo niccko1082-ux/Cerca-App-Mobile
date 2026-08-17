@@ -138,16 +138,28 @@ export function useAdminPanel(platformRole: Role) {
   };
 
   const filteredReports = reports.filter((r) => {
+    if (platformRole === 'MODERATOR' && r.targetType === 'user') {
+      return false;
+    }
     const matchesTab = r.status === activeTab;
     const matchesCategory = categoryFilter === 'all' || r.targetType === categoryFilter;
     return matchesTab && matchesCategory;
   });
 
+  const getVisibleReports = () => {
+    if (platformRole === 'MODERATOR') {
+      return reports.filter((r) => r.targetType !== 'user');
+    }
+    return reports;
+  };
+
+  const visibleReports = getVisibleReports();
+
   return {
     reports: filteredReports,
-    totalCount: reports.length,
-    pendingCount: reports.filter((r) => r.status === 'pending').length,
-    resolvedCount: reports.filter((r) => r.status === 'resolved').length,
+    totalCount: visibleReports.length,
+    pendingCount: visibleReports.filter((r) => r.status === 'pending').length,
+    resolvedCount: visibleReports.filter((r) => r.status === 'resolved').length,
     activeTab,
     setActiveTab,
     categoryFilter,

@@ -21,9 +21,12 @@ export function minorUnitDigits(currency: string): number {
 
 export function formatMoney(money: Money, locale?: string): string {
   const digits = minorUnitDigits(money.currency);
-  return new Intl.NumberFormat(locale, { style: 'currency', currency: money.currency }).format(
-    money.amountMinor / 10 ** digits,
-  );
+  const amount = money.amountMinor / 10 ** digits;
+  const formattedNumber = new Intl.NumberFormat(locale, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: digits,
+  }).format(amount);
+  return `${formattedNumber} ${money.currency}`;
 }
 
 // Convierte un texto decimal escrito por el usuario ("500.00") a unidades

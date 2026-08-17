@@ -18,6 +18,10 @@ import { useListingReviews } from '@/presentation/listing/hooks/useListingReview
 import { useCreateBooking } from '@/presentation/booking/hooks/useCreateBooking';
 import { useSession } from '@/presentation/auth/SessionContext';
 import { formatPricing } from '@/utils/money';
+import {
+  useFavoritesQuery,
+  useToggleFavoriteMutation,
+} from '@/presentation/listing/hooks/useFavorites';
 
 const STATUS_KEY: Record<string, string> = {
   draft: 'listing.statusDraft',
@@ -38,6 +42,10 @@ export default function ListingDetailScreen() {
   const { data: reviewsPage, isLoading: reviewsLoading } = useListingReviews(id);
   const createBooking = useCreateBooking();
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
+
+  const { data: favorites } = useFavoritesQuery();
+  const toggleFavorite = useToggleFavoriteMutation();
+  const isFavorite = !!listing && (favorites?.includes(listing.id) ?? false);
 
   const category = categories?.find((c) => c.id === listing?.categoryId);
   const isOwnListing = !!actor && !!listing && actor.id === listing.ownerId;
@@ -62,6 +70,22 @@ export default function ListingDetailScreen() {
         <ThemedText style={[styles.headerTitle, { color: t.text }]} numberOfLines={1}>
           {listing?.title ?? translate('listing.detailTitleFallback')}
         </ThemedText>
+        {listing ? (
+          <TouchableOpacity
+            onPress={() => toggleFavorite.mutate(listing.id)}
+            accessibilityRole="button"
+            accessibilityLabel={translate(
+              isFavorite ? 'listing.removeFavorite' : 'listing.addFavorite',
+            )}
+            hitSlop={TOUCH_HIT_SLOP}
+          >
+            <MaterialCommunityIcons
+              name={isFavorite ? 'heart' : 'heart-outline'}
+              size={24}
+              color={isFavorite ? '#FF3B30' : t.text}
+            />
+          </TouchableOpacity>
+        ) : null}
       </View>
 
       {isLoading || !actor ? (

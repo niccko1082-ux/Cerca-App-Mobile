@@ -3,7 +3,7 @@ import React, { useCallback, useDeferredValue, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  ScrollView,
+  Modal,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -25,7 +25,7 @@ import { useSearchListings } from '@/presentation/search/hooks/useSearchListings
 
 const DEFAULT_RADIUS_KM = 10;
 const RADIUS_STEP_KM = 10;
-const ITEM_HEIGHT = 76;
+const ITEM_HEIGHT = 94;
 const ITEM_GAP = 12;
 
 export default function SearchScreen() {
@@ -40,6 +40,7 @@ export default function SearchScreen() {
   const query = useDeferredValue(queryInput);
   const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
   const [radiusKm, setRadiusKm] = useState(DEFAULT_RADIUS_KM);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
 
   const hasActiveFilters = query.trim().length > 0 || categoryId !== undefined;
 
@@ -157,43 +158,86 @@ export default function SearchScreen() {
         ) : null}
       </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.chipsRow}
+      <TouchableOpacity
+        style={[styles.filterSelector, { backgroundColor: t.card, borderColor: t.border }]}
+        onPress={() => setShowCategoryModal(true)}
+        activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={translate('search.selectCategory')}
+      >
+        <View style={styles.filterSelectorContent}>
+          <MaterialCommunityIcons name="tag-outline" size={18} color={t.primary} />
+          <ThemedText style={[styles.filterSelectorText, { color: t.text }]}>
+            {categoryId === undefined
+              ? translate('search.all')
+              : (categories?.find((c) => c.id === categoryId)?.name ?? translate('search.all'))}
+          </ThemedText>
+        </View>
+        <MaterialCommunityIcons name="chevron-down" size={18} color={t.icon} />
+      </TouchableOpacity>
+
+      <Modal
+        visible={showCategoryModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowCategoryModal(false)}
       >
         <TouchableOpacity
-          style={[
-            styles.chip,
-            { borderColor: t.border },
-            categoryId === undefined && { backgroundColor: t.primary, borderColor: t.primary },
-          ]}
-          onPress={() => setCategoryId(undefined)}
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowCategoryModal(false)}
         >
-          <ThemedText
-            style={{ color: categoryId === undefined ? '#FFFFFF' : t.text, fontSize: 13 }}
-          >
-            {translate('search.all')}
-          </ThemedText>
+          <View style={[styles.modalContent, { backgroundColor: t.card }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: t.border }]}>
+              <ThemedText style={[styles.modalTitle, { color: t.text }]}>
+                {translate('search.selectCategory')}
+              </ThemedText>
+              <TouchableOpacity
+                onPress={() => setShowCategoryModal(false)}
+                hitSlop={TOUCH_HIT_SLOP}
+              >
+                <MaterialCommunityIcons name="close" size={24} color={t.text} />
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={[{ id: 'all', name: translate('search.all') }, ...(categories ?? [])]}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => {
+                const isSelected =
+                  item.id === 'all' ? categoryId === undefined : categoryId === item.id;
+                return (
+                  <TouchableOpacity
+                    style={[
+                      styles.modalOption,
+                      isSelected && { backgroundColor: t.backgroundSelected },
+                    ]}
+                    onPress={() => {
+                      setCategoryId(item.id === 'all' ? undefined : item.id);
+                      setShowCategoryModal(false);
+                    }}
+                  >
+                    <ThemedText
+                      style={[
+                        styles.modalOptionText,
+                        { color: isSelected ? t.primary : t.text },
+                        isSelected && { fontWeight: 'bold' },
+                      ]}
+                    >
+                      {item.name}
+                    </ThemedText>
+                    {isSelected && (
+                      <MaterialCommunityIcons name="check" size={20} color={t.primary} />
+                    )}
+                  </TouchableOpacity>
+                );
+              }}
+              ItemSeparatorComponent={() => (
+                <View style={[styles.modalSeparator, { backgroundColor: t.border }]} />
+              )}
+            />
+          </View>
         </TouchableOpacity>
-        {(categories ?? []).map((category) => (
-          <TouchableOpacity
-            key={category.id}
-            style={[
-              styles.chip,
-              { borderColor: t.border },
-              categoryId === category.id && { backgroundColor: t.primary, borderColor: t.primary },
-            ]}
-            onPress={() => setCategoryId(category.id)}
-          >
-            <ThemedText
-              style={{ color: categoryId === category.id ? '#FFFFFF' : t.text, fontSize: 13 }}
-            >
-              {category.name}
-            </ThemedText>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      </Modal>
 
       {isLoading ? (
         <View style={styles.list}>
@@ -313,19 +357,61 @@ const styles = StyleSheet.create({
     height: '100%',
     fontSize: 15,
   },
-  chipsRow: {
+  filterSelector: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    gap: 8,
-  },
-  chip: {
-    alignSelf: 'flex-start',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: 20,
+    marginTop: 12,
+    marginBottom: 8,
     borderWidth: 1,
-    borderRadius: 20,
+    borderRadius: 12,
     paddingHorizontal: 14,
-    paddingVertical: 13,
+    height: 46,
+  },
+  filterSelectorContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  filterSelectorText: {
+    marginLeft: 8,
+    fontSize: 15,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '60%',
+    paddingBottom: 34,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingVertical: 18,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  modalOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+  },
+  modalOptionText: {
+    fontSize: 16,
+  },
+  modalSeparator: {
+    height: StyleSheet.hairlineWidth,
   },
   list: {
     paddingHorizontal: 20,
