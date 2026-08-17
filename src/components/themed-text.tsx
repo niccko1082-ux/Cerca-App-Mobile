@@ -8,7 +8,16 @@ export type ThemedTextProps = TextProps & {
   themeColor?: ThemeColor;
 };
 
-export function ThemedText({ style, type = 'default', themeColor, ...rest }: ThemedTextProps) {
+export function ThemedText({
+  style,
+  type = 'default',
+  themeColor,
+  // Cerca.md: "maxFontSizeMultiplier, nunca allowFontScaling={false}" — la app
+  // tiene que aguantar la fuente al 200% sin cortes. 2 es el tope por defecto;
+  // las instancias en layouts muy ajustados (badges, chips) pueden bajarlo.
+  maxFontSizeMultiplier = 2,
+  ...rest
+}: ThemedTextProps) {
   const theme = useTheme();
 
   return (
@@ -25,6 +34,7 @@ export function ThemedText({ style, type = 'default', themeColor, ...rest }: The
         type === 'code' && styles.code,
         style,
       ]}
+      maxFontSizeMultiplier={maxFontSizeMultiplier}
       {...rest}
     />
   );

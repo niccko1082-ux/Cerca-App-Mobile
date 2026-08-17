@@ -9,7 +9,8 @@
     "scheme": "cerca",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.maribeth3112.cerca"
     },
     "android": {
       "adaptiveIcon": {

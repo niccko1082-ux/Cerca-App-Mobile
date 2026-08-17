@@ -1,8 +1,10 @@
 // src/components/auth/RegisterForm.tsx
 import React from 'react';
 import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { CustomInput } from '@/components/common/CustomInput';
 import { ThemedText } from '@/components/themed-text';
+import { ErrorText } from '@/components/common/ErrorText';
 import { useTheme } from '@/hooks/use-theme';
 
 interface Props {
@@ -33,14 +35,15 @@ export function RegisterForm({
   errorMessage,
 }: Props) {
   const t = useTheme();
+  const { t: translate } = useTranslation();
 
   return (
     <View style={styles.container}>
       {/* Campo Nombre Completo */}
       <CustomInput
-        label="Nombre completo"
+        label={translate('auth.register.nameLabel')}
         iconName="account-outline"
-        placeholder="Tu nombre completo"
+        placeholder={translate('auth.register.namePlaceholder')}
         value={name}
         onChangeText={onChangeName}
         autoCapitalize="words"
@@ -48,9 +51,9 @@ export function RegisterForm({
 
       {/* Campo Correo Electrónico */}
       <CustomInput
-        label="Correo electrónico"
+        label={translate('auth.login.emailLabel')}
         iconName="email-outline"
-        placeholder="tu@correo.com"
+        placeholder={translate('auth.login.emailPlaceholder')}
         value={email}
         onChangeText={onChangeEmail}
         keyboardType="email-address"
@@ -59,18 +62,18 @@ export function RegisterForm({
 
       {/* Campo Contraseña con helperText acorde a singUpSchema */}
       <CustomInput
-        label="Contraseña"
+        label={translate('auth.login.passwordLabel')}
         iconName="lock-outline"
         placeholder="••••••••"
         value={password}
         onChangeText={onChangePassword}
         isPassword
-        helperText="Debe contener al menos 8 caracteres, un número y una letra mayúscula."
+        helperText={translate('auth.register.passwordHelper')}
       />
 
       {/* Campo Confirmar Contraseña */}
       <CustomInput
-        label="Confirmar contraseña"
+        label={translate('auth.register.confirmPasswordLabel')}
         iconName="lock-check-outline"
         placeholder="••••••••"
         value={confirmPassword}
@@ -79,9 +82,7 @@ export function RegisterForm({
       />
 
       {/* Mensaje de error si la respuesta del backend o formulario falla */}
-      {errorMessage ? (
-        <ThemedText style={styles.errorText}>{errorMessage}</ThemedText>
-      ) : null}
+      {errorMessage ? <ErrorText>{errorMessage}</ErrorText> : null}
 
       {/* Botón de Registro */}
       <TouchableOpacity
@@ -93,7 +94,9 @@ export function RegisterForm({
         {isLoading ? (
           <ActivityIndicator color="#FFFFFF" />
         ) : (
-          <ThemedText style={styles.submitButtonText}>Crear cuenta</ThemedText>
+          <ThemedText style={styles.submitButtonText}>
+            {translate('auth.register.submit')}
+          </ThemedText>
         )}
       </TouchableOpacity>
     </View>

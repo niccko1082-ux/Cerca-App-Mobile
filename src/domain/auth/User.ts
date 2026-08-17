@@ -1,8 +1,15 @@
+export type Capacity = 'customer' | 'provider';
+export type PlatformRole = 'user' | 'moderator' | 'admin';
+export type Role = 'USER' | 'MODERATOR' | 'ADMIN';
+export type ParticipantType = 'Cliente' | 'Proveedor';
+
 export interface User {
-    id: string;
-    email: string;
-    name?: string;
-    displayName?: string;
+  id: string;
+  email: string;
+  name?: string;
+  displayName?: string;
+  capacities?: Capacity[];
+  platformRole?: PlatformRole;
 }
 
 export interface AuthSession {
@@ -12,14 +19,11 @@ export interface AuthSession {
 }
 
 export interface SignUpData {
-    email: string;
-    password: string;
-    displayName?: string;
-    name?: string; 
+  email: string;
+  password: string;
+  displayName?: string;
+  name?: string;
 }
-
-export type Role = 'USER' | 'MODERATOR' | 'ADMIN';
-export type ParticipantType = 'Cliente' | 'Proveedor';
 
 export interface LoginFormState {
   participantType: ParticipantType;
