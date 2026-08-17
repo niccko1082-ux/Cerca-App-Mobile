@@ -10,17 +10,14 @@ export function LoginHeader() {
   const { scheme } = useThemeMode();
   const { t: translate } = useTranslation();
 
-  const logoSource = scheme === 'dark'
-    ? require('@/assets/images/logo-dark.png')
-    : require('@/assets/images/logo-light.png');
+  const logoSource =
+    scheme === 'dark'
+      ? require('@/assets/images/logo-dark.png')
+      : require('@/assets/images/logo-light.png');
 
   return (
     <View style={styles.header}>
-      <Image
-        source={logoSource}
-        style={styles.logoImage}
-        contentFit="contain"
-      />
+      <Image source={logoSource} style={styles.logoImage} contentFit="contain" />
       <ThemedText type="title" style={[styles.brandText, { color: t.text }]}>
         {translate('auth.login.brand')}
       </ThemedText>
@@ -50,4 +47,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-
