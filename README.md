@@ -1,56 +1,78 @@
-# Welcome to your Expo app 👋
+# Cerca - App Mobile 📱
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Cerca** es una aplicación móvil desarrollada en React Native y Expo que funciona como un Marketplace de Servicios Locales de dos caras, permitiendo conectar a clientes locales con proveedores de servicios de confianza (carpintería, aire acondicionado, etc.).
 
-## Get started
+---
 
-1. Install dependencies
+## 📥 Descarga de la APK (Android)
 
-   ```bash
-   npm install
-   ```
+Puedes descargar la versión de previsualización (APK) directamente en tu dispositivo Android a través del siguiente enlace público sin inconvenientes:
 
-2. Start the app
+* **[Descargar APK Directa (Expo Artifacts)](https://expo.dev/artifacts/eas/DCvkUa6g0B60Ya1BUWCG9bd8mBSXSo3Lcbg7cIKlyi4.apk)**
+* **[Historial de Builds y Descargas en Expo Dashboard](https://expo.dev/accounts/maribeth3112/projects/cerca/builds)**
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## 🛠️ Requisitos Previos
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Antes de ejecutar el proyecto, asegúrate de tener instalado y configurado lo siguiente:
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+1. **Node.js** (Versión 18.x o superior).
+2. **npm** (Viene integrado con Node.js) o **yarn**.
+3. **Dispositivo Móvil / Emulador:**
+   * Dispositivo físico Android/iOS con la aplicación **Expo Go** instalada (disponible en Play Store y App Store).
+   * O bien, un emulador Android (Android Studio) o simulador iOS (Xcode) configurado en el sistema.
+4. **Red Local:** El dispositivo físico y tu computadora de desarrollo deben estar conectados a la **misma red WiFi** para que la app móvil pueda consumir el backend local.
 
-## Get a fresh project
+---
 
-When you're ready, run:
+## 🚀 Pasos para Levantar el Proyecto
 
+Sigue estos sencillos pasos para iniciar el entorno de desarrollo:
+
+### 1. Instalar las dependencias
+Abre la terminal en la raíz del proyecto y ejecuta:
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2. Configurar las Variables de Entorno
+Copia el archivo de plantilla `.env.example` para crear tu archivo `.env` de desarrollo local:
+```bash
+cp .env.example .env
+```
+Abre el archivo `.env` recién creado y configura la variable `EXPO_PUBLIC_API_URL` utilizando la dirección IP local de tu computador y el puerto del backend (generalmente `3333`):
+```env
+EXPO_PUBLIC_API_URL=http://<TU_IP_LOCAL>:3333
+```
+> **Nota:** Para conocer tu dirección IP local en Mac/Linux ejecuta `ifconfig` o en Windows ejecuta `ipconfig` en la consola. Evita usar `localhost` o `127.0.0.1` si vas a probar en un dispositivo físico.
 
-### Other setup steps
+### 3. Iniciar el Servidor de Desarrollo
+Para levantar el servidor de desarrollo de Expo, ejecuta:
+```bash
+npx expo start
+```
+* **Dispositivo Físico:** Escanea el código QR que se visualiza en la terminal usando la cámara de tu celular (iOS) o la app Expo Go (Android).
+* **Emulador Android:** Presiona la tecla `a` en la consola.
+* **Simulador iOS:** Presiona la tecla `i` en la consola.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+---
 
-## Learn more
+## ⚙️ Comandos del Proyecto
 
-To learn more about developing your project with Expo, look at the following resources:
+El proyecto incluye scripts configurados para mantener la calidad y verificar el correcto funcionamiento del código:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+* **Iniciar en modo desarrollo:** `npm run dev`
+* **Ejecutar Pruebas Unitarias:** `npm run test` (ejecuta Vitest para verificar políticas de negocio y adapters).
+* **Ejecutar Linter:** `npm run lint` (verifica errores de estilo y buenas prácticas).
+* **Auto-formatear código con Prettier:** `npm run format`
+* **Script de verificación completa:** `./scripts/verify.sh` (ejecuta TypeScript, Prettier, ESLint y pruebas unitarias de una sola vez).
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
+## 👥 Integrantes del Proyecto
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Este proyecto fue desarrollado y configurado por:
+
+* **Nicolás Agudelo**
+* **Maribel Castañeda**
