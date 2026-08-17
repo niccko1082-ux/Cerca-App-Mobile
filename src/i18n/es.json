@@ -88,6 +88,7 @@
     "ratingSummary_one": "{{rating}} · {{count}} reseña",
     "ratingSummary_other": "{{rating}} · {{count}} reseñas",
     "noReviewsYet": "Sin reseñas todavía",
+    "nearYou": "Cerca de ti",
     "description": "Descripción",
     "reviews": "Reseñas",
     "noReviewsForListing": "Todavía no hay reseñas para este anuncio.",

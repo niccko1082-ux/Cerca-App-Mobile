@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/themed-text';
 import { ErrorText } from '@/components/common/ErrorText';
 import { ThemedView } from '@/components/themed-view';
+import { PricingModelBadge } from '@/components/listing/PricingModelBadge';
 import { ListingDetail } from '@/domain/listing/Listing';
 import { useTheme } from '@/hooks/use-theme';
 import { usePublishListing } from '@/presentation/listing/hooks/usePublishListing';
@@ -80,6 +81,7 @@ export function MyListingCard({ listing }: Props) {
           <ThemedText style={[styles.price, { color: t.primary }]}>
             {formatPriceFrom(listing.priceFrom)}
           </ThemedText>
+          <PricingModelBadge model={listing.pricing.model} />
           {listing.ratingCount > 0 ? (
             <View style={styles.metaRow}>
               <MaterialCommunityIcons name="star" size={12} color={t.icon} />

@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/themed-text';
 import { ErrorText } from '@/components/common/ErrorText';
 import { ThemedView } from '@/components/themed-view';
+import { PricingModelBadge } from '@/components/listing/PricingModelBadge';
 import { TOUCH_HIT_SLOP } from '@/constants/accessibility';
 import { useTheme } from '@/hooks/use-theme';
 import { useCategories } from '@/presentation/search/hooks/useCategories';
@@ -101,6 +102,7 @@ export default function ListingDetailScreen() {
           <ThemedText style={[styles.price, { color: t.primary }]}>
             {formatPricing(listing.pricing)}
           </ThemedText>
+          <PricingModelBadge model={listing.pricing.model} />
 
           <View style={styles.metaRow}>
             <MaterialCommunityIcons name="star" size={15} color={t.icon} />

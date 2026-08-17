@@ -16,6 +16,9 @@ interface Props {
   onPress: (listing: ListingSummary) => void;
 }
 
+// Umbral para el badge "Cerca de ti" — a esta distancia caminar es razonable.
+const NEAR_YOU_THRESHOLD_METERS = 1000;
+
 const STATUS_KEY: Partial<Record<ListingSummary['status'], string>> = {
   paused: 'listing.statusPaused',
   under_review: 'listing.statusUnderReview',
@@ -29,6 +32,8 @@ function ListingCardComponent({ listing, onPress }: Props) {
   const t = useTheme();
   const { t: translate } = useTranslation();
   const statusKey = STATUS_KEY[listing.status];
+  const isNearby =
+    listing.distanceMeters !== undefined && listing.distanceMeters <= NEAR_YOU_THRESHOLD_METERS;
 
   return (
     <TouchableOpacity
@@ -37,7 +42,9 @@ function ListingCardComponent({ listing, onPress }: Props) {
       activeOpacity={0.8}
       accessible
       accessibilityRole="button"
-      accessibilityLabel={`${listing.title}, ${formatPriceFrom(listing.priceFrom)}`}
+      accessibilityLabel={`${listing.title}, ${formatPriceFrom(listing.priceFrom)}${
+        isNearby ? `, ${translate('listing.nearYou')}` : ''
+      }`}
     >
       <View style={styles.iconBadge}>
         <MaterialCommunityIcons name="storefront-outline" size={26} color={t.primary} />
@@ -48,6 +55,12 @@ function ListingCardComponent({ listing, onPress }: Props) {
           <ThemedText style={[styles.title, { color: t.text }]} numberOfLines={1}>
             {listing.title}
           </ThemedText>
+          {isNearby ? (
+            <View style={[styles.nearBadge, { backgroundColor: t.primary }]}>
+              <MaterialCommunityIcons name="map-marker" size={11} color="#FFFFFF" />
+              <ThemedText style={styles.nearBadgeText}>{translate('listing.nearYou')}</ThemedText>
+            </View>
+          ) : null}
           {statusKey ? (
             <ThemedView style={[styles.statusBadge, { backgroundColor: t.backgroundSelected }]}>
               <ThemedText style={[styles.statusText, { color: t.textSecondary }]}>
@@ -126,6 +139,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 6,
+  },
+  nearBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  nearBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '700',
   },
   statusText: {
     fontSize: 11,
